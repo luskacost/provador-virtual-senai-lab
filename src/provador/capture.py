@@ -3,6 +3,7 @@
 import sys
 import threading
 import time
+from collections import deque
 from dataclasses import dataclass
 from typing import Self
 
@@ -21,7 +22,10 @@ class Frame:
 
 
 class CameraThread:
-    """Lê a webcam num loop dedicado e guarda apenas o frame mais recente (sem fila, sem atraso acumulado)."""
+    """Lê a webcam num loop dedicado. O consumidor pega o frame mais recente (sem fila, sem atraso
+    acumulado); os últimos HISTORY frames ficam disponíveis por id para sincronizar vídeo e pose."""
+
+    HISTORY = 8
 
     def __init__(self, index: int = 0, width: int = 1280, height: int = 720, fps: int = 30):
         self.index = index
@@ -32,6 +36,7 @@ class CameraThread:
         self._stop = threading.Event()
         self._lock = threading.Lock()
         self._frame: Frame | None = None
+        self._history: deque[Frame] = deque(maxlen=self.HISTORY)
         self._next_id = 0
         self.error: str | None = None
 
@@ -66,6 +71,7 @@ class CameraThread:
             t = time.perf_counter()
             with self._lock:
                 self._frame = Frame(self._next_id, image, t)
+                self._history.append(self._frame)
                 self._next_id += 1
             self.capture_rate.tick()
 
@@ -76,6 +82,14 @@ class CameraThread:
         if frame is None or frame.id <= after_id:
             return None
         return frame
+
+    def get(self, frame_id: int) -> Frame | None:
+        """Frame com esse id, se ainda estiver no histórico."""
+        with self._lock:
+            for frame in reversed(self._history):
+                if frame.id == frame_id:
+                    return frame
+        return None
 
     def stop(self) -> None:
         self._stop.set()

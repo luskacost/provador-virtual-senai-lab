@@ -41,9 +41,10 @@ Status: ✅ feito · 🔄 em andamento · ⬜ a fazer
 | T2 | P0 | ✅ | Captura em thread própria + janela GLFW com a webcam + HUD de FPS | Vídeo 720p com ≥30 FPS |
 | T3 | P0 | ✅ | Pose (VIDEO, full) + One Euro, esqueleto no modo debug | Landmarks ≥30 Hz; parado, desvio-padrão dos ombros <2 px |
 | T4 | P0 | ✅ | `tools/make_template.py`: camiseta procedural rigada no esqueleto padrão | GLB carrega e deforma ao girar os ossos |
-| T5 | P0 | 🔄 | Renderer: GLB, LBS no vertex shader, projeção alinhada à webcam | Peça estática sobre o vídeo, MSAA, sem readback para a CPU |
-| T6 | P0 | ⬜ | Retarget: tronco, ombros, braços; escala por ombros/tronco; torção ±30° | Erro médio <15 px entre articulações da peça e landmarks |
+| T5 | P0 | ✅ | Renderer: GLB, LBS no vertex shader, projeção alinhada à webcam | Peça estática sobre o vídeo, MSAA, sem readback para a CPU |
+| T6 | P0 | 🔄 | Retarget: tronco, ombros, braços; escala por ombros/tronco; torção ±30° | Erro médio <15 px entre articulações da peça e landmarks |
 | T7 | P0 | ⬜ | Segmentação assíncrona + oclusão do braço + dilatação da peça | Braço cruzado à frente aparece sobre a peça, sem cintilar |
+| T7b | P1 | ⬜ | Cenários atrás do usuário (troca de fundo pela máscara), tecla B — ver [`cenarios.md`](cenarios.md) | Troca sem queda de FPS e sem halo visível nos ombros |
 | T8 | P0 | ⬜ | Navegação: ←/→, teclas 1–9, miniaturas clicáveis, GLBs pré-carregados | Troca entre 5 peças <100 ms, sem queda de FPS |
 | T9 | P1 | ⬜ | `tools/garment_from_photos.py`: recorte, projeção na UV do template, `meta.json` | Fotos de uma peça real viram GLB com textura certa no app |
 | T10 | P1 | ⬜ | Luz: SH ordem 2, exposição, balanço de branco, grão leve, PBR simples | A peça acompanha mudanças de luz do ambiente |

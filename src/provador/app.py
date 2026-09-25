@@ -1,8 +1,9 @@
 """App do Provador Virtual 3D: webcam + peça 3D rigada (LBS na GPU) + HUD.
 
 Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug] [--garment x.glb] [--hfov 70]
-Teclas: Esc/Q sai · H HUD · M espelho · G peça · A animação de teste do LBS · K esqueleto (--debug)
---debug liga a pose (T3): esqueleto sobre o vídeo e métricas de pose e jitter no HUD.
+Teclas: Esc/Q sai · H HUD · M espelho · G peça · S sincronia vídeo/pose · A animação de teste do LBS
+        K esqueleto (--debug)
+A peça segue o corpo pela pose (retarget.py). --debug mostra o esqueleto e as métricas de pose/jitter.
 """
 
 import argparse
@@ -21,8 +22,9 @@ from .debug_draw import SkeletonOverlay
 from .garment import load_glb
 from .garment_render import GarmentRenderer
 from .gl_sync import finish_without_gil
-from .metrics import JitterStats, LatencyStats, RateCounter
-from .pose import L_SHOULDER, R_SHOULDER, PoseWorker
+from .metrics import JitterStats, LatencyStats, RateCounter, RunningMean
+from .pose import L_SHOULDER, R_SHOULDER, PoseResult, PoseWorker
+from .retarget import Retarget, joint_error_px, retarget
 from .viewport import letterbox
 
 SHADERS = paths.ROOT / "src" / "provador" / "shaders"
@@ -31,7 +33,7 @@ HUD_WIDTH = 560
 HUD_LINE_H = 26
 HUD_REFRESH_S = 0.25         # o texto muda pouco: reenviar a textura só 4x/s
 MSAA_SAMPLES = 4
-# T5: peça estática à frente da câmera (quadril do esqueleto em y=1,0 m). A T6 troca pelo retarget.
+# Posição fixa usada só pela animação de teste (tecla A); no uso normal o retarget posiciona a peça.
 STATIC_MODEL = sk.translation((0.0, -1.25, -1.7))
 
 
@@ -63,6 +65,9 @@ class App:
         self.garments: GarmentRenderer | None = None
         self.show_garment = True
         self.demo_anim = args.demo
+        self.sync_video = True
+        self.fit: Retarget | None = None
+        self.fit_error = RunningMean()
         self.render_rate = RateCounter()
         self.latency = LatencyStats()
         self.win = None
@@ -108,7 +113,6 @@ class App:
         except (OSError, ValueError) as exc:
             print(f"[AVISO] peça não carregada ({exc}). Gere o template: python tools/make_template.py")
             return
-        self.garments.set_pose(sk.skin_matrices(sk.world_matrices()), STATIC_MODEL)
         print(f"Peça: {self.garments.current.name}")
 
     def _demo_pose(self, t: float) -> None:
@@ -135,8 +139,8 @@ class App:
             self.show_garment = not self.show_garment
         elif key == glfw.KEY_A and self.garments:
             self.demo_anim = not self.demo_anim
-            if not self.demo_anim:
-                self.garments.set_pose(sk.skin_matrices(sk.world_matrices()), STATIC_MODEL)
+        elif key == glfw.KEY_S:
+            self.sync_video = not self.sync_video
 
     def _upload_hud(self, image: np.ndarray) -> None:
         h, w = image.shape[:2]
@@ -199,7 +203,7 @@ class App:
         self.prog["mirror"].value = self.mirror
         self.video_tex.use(0)
         self.vao.render(moderngl.TRIANGLE_STRIP, vertices=4)
-        if self.garments and self.show_garment:
+        if self.garments and self.show_garment and (self.fit is not None or self.demo_anim):
             self.garments.draw((w, h), self.mirror)
         if self.skeleton and self.show_skeleton:
             self.skeleton.draw((w, h), self.mirror)
@@ -230,38 +234,44 @@ class App:
             f"FPS camera  {cam.capture_rate.rate:5.1f}",
             f"Latencia captura->tela  {self.latency.mean_ms:4.0f} ms (max {self.latency.max_ms:.0f})",
         ]
-        if self.pose:
-            if self.pose.error:
-                lines.append(f"POSE: {self.pose.error}")
-            else:
-                lines += [
-                    (f"Pose {self.pose.rate.rate:5.1f} Hz | inferencia {self.pose.inference.mean_ms:4.1f} ms"
-                     f" | {'pessoa OK' if self.person_found else 'SEM PESSOA'}"),
-                    (f"Jitter ombros (desvio-padrao px): cru {self.jitter_raw.std_max:.2f}"
-                     f" -> filtrado {self.jitter_filtered.std_max:.2f}"),
-                ]
+        if self.fit is not None:
+            lines.append(f"Ajuste: {self.fit.depth:.2f} m | escala {self.fit.scale[0]:.2f}/{self.fit.scale[1]:.2f}"
+                         f" | giro {self.fit.yaw_deg:+.0f} torcao {self.fit.twist_deg:+.0f} | "
+                         f"erro {self.fit_error.mean:.1f} px")
+        if self.pose and self.pose.error:
+            lines.append(f"POSE: {self.pose.error}")
+        elif self.pose:
+            lines.append(f"Pose {self.pose.rate.rate:5.1f} Hz | inferencia {self.pose.inference.mean_ms:4.1f} ms"
+                         f" | {'pessoa OK' if self.person_found else 'SEM PESSOA'}")
+            if self.args.debug:
+                lines.append(f"Jitter ombros (desvio-padrao px): cru {self.jitter_raw.std_max:.2f}"
+                             f" -> filtrado {self.jitter_filtered.std_max:.2f}")
         if self.garments and self.garments.current:
             lines.append(f"Peca: {self.garments.current.name} | hFOV {self.garments.hfov:.0f} | "
-                         f"G: peca | A: animacao {'ON' if self.demo_anim else 'OFF'}")
+                         f"G: peca | S: sincronia {'ON' if self.sync_video else 'OFF'} | "
+                         f"A: animacao {'ON' if self.demo_anim else 'OFF'}")
         lines.append(f"Espelho {'ON' if self.mirror else 'OFF'} | H: HUD | M: espelho | K: esqueleto | Esc: sair")
         return lines
 
-    def _update_pose(self, last_pose_id: int) -> int:
-        """Puxa o resultado de pose mais novo para o overlay e as métricas. Devolve o id consumido."""
-        frame_id, result = self.pose.latest()
-        if frame_id == last_pose_id:
-            return last_pose_id
+    def _update_pose(self, frame_id: int, result: PoseResult | None) -> None:
+        """Aplica um resultado de pose novo: retarget da peça, overlay e métricas."""
         self.person_found = result is not None
         if result is None:
-            self.skeleton.clear()
+            self.fit = None
+            if self.skeleton:
+                self.skeleton.clear()
             self.jitter_raw.reset()
             self.jitter_filtered.reset()
-            return frame_id
-        self.skeleton.update(result.px, result.visibility, result.image_size)
+            return
+        self.fit = retarget(result.px, result.world, result.visibility, result.image_size, self.args.hfov)
+        self.fit_error.add(joint_error_px(self.fit, result.px_raw, self.args.hfov, result.image_size))
+        if self.garments and not self.demo_anim:
+            self.garments.set_pose(self.fit.skin, np.eye(4))
+        if self.skeleton:
+            self.skeleton.update(result.px, result.visibility, result.image_size)
         shoulders = (L_SHOULDER, R_SHOULDER)
         self.jitter_raw.add(result.px_raw[shoulders, :2].ravel())
         self.jitter_filtered.add(result.px[shoulders, :2].ravel())
-        return frame_id
 
     def _save_screenshot(self, path: str) -> None:
         fb_w, fb_h = glfw.get_framebuffer_size(self.win)
@@ -278,8 +288,7 @@ class App:
             return 1
         try:
             self._init_window()
-            if self.args.debug:
-                self.pose = PoseWorker(cam).start()
+            self.pose = PoseWorker(cam).start()
             return self._loop(cam)
         except RuntimeError as exc:
             print(f"[ERRO] {exc}")
@@ -303,12 +312,18 @@ class App:
             if self.args.seconds and time.perf_counter() - t_start >= self.args.seconds:
                 break
 
-            frame = cam.latest(last_id)
+            frame = None
+            pose_id, pose_result = self.pose.latest() if self.pose else (-1, None)
+            if pose_id != last_pose_id:
+                self._update_pose(pose_id, pose_result)
+                last_pose_id = pose_id
+                if self.sync_video and pose_result is not None and pose_id > last_id:
+                    frame = cam.get(pose_id)                    # o frame que gerou a pose: peça e vídeo juntos
+            if frame is None and not (self.sync_video and self.person_found):
+                frame = cam.latest(last_id)                     # sem pessoa (ou sem sincronia): o mais recente
             if frame is not None:
                 self._upload_frame(frame.image)
                 last_id = frame.id
-            if self.pose:
-                last_pose_id = self._update_pose(last_pose_id)
             if self.demo_anim:
                 self._demo_pose(time.perf_counter() - t_start)
 
@@ -332,6 +347,10 @@ class App:
         if self.args.seconds:
             print(f"FPS render {self.render_rate.rate:.1f} | FPS camera {cam.capture_rate.rate:.1f} | "
                   f"latencia {self.latency.mean_ms:.0f} ms (max {self.latency.max_ms:.0f})")
+            if self.fit is not None:
+                print(f"Ajuste {self.fit.depth:.2f} m | escala {self.fit.scale[0]:.2f}/{self.fit.scale[1]:.2f} | "
+                      f"giro {self.fit.yaw_deg:+.0f} | torcao {self.fit.twist_deg:+.0f} | "
+                      f"erro articulacoes {self.fit_error.mean:.1f} px")
             if self.pose:
                 print(f"Pose {self.pose.rate.rate:.1f} Hz | inferencia {self.pose.inference.mean_ms:.1f} ms | "
                       f"pessoa {'sim' if self.person_found else 'NAO'} | jitter ombros px: "

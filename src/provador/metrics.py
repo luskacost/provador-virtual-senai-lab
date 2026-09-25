@@ -74,3 +74,17 @@ class JitterStats:
             return 0.0
         cols = list(zip(*self._samples, strict=True))
         return max(statistics.pstdev(c) for c in cols)
+
+
+class RunningMean:
+    """Média das últimas N amostras (unidade livre)."""
+
+    def __init__(self, size: int = 90):
+        self._samples: deque[float] = deque(maxlen=size)
+
+    def add(self, value: float) -> None:
+        self._samples.append(float(value))
+
+    @property
+    def mean(self) -> float:
+        return sum(self._samples) / len(self._samples) if self._samples else 0.0
