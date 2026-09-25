@@ -19,6 +19,7 @@ import numpy as np
 
 from . import paths
 from . import skeleton as sk
+from .benchmark import SessionRecorder, SystemSampler
 from .capture import CameraThread
 from .catalog import Selector, load_catalog
 from .debug_draw import SkeletonOverlay
@@ -78,6 +79,8 @@ class App:
         self.adaptive_light = not args.fixed_light
         self.light_est = LightEstimator(wb_strength=args.wb_strength)
         self.light_ms = LatencyStats()
+        self.recorder: SessionRecorder | None = None      # definido por tools/benchmark.py
+        self.gl_renderer = "?"
         self._last_frame = None
         self._last_pose: PoseResult | None = None
         self._last_light_t = 0.0
@@ -118,6 +121,7 @@ class App:
 
         self.ctx = moderngl.create_context()
         renderer = self.ctx.info.get("GL_RENDERER", "?")
+        self.gl_renderer = renderer
         print(f"OpenGL: {renderer}")
         if "intel" in renderer.lower():
             print("[AVISO] OpenGL na GPU integrada; veja docs/hardware.md (ajuste 1).")
@@ -434,6 +438,17 @@ class App:
         shot_done = False
         last_swap = None
         last_cycle = t_start
+        rec = self.recorder
+        sampler = None
+        if rec:
+            rec.t0 = t_start
+            for stats in (self.light_ms, self.frame_ms):
+                stats.keep_history()
+            self.pose.inference.keep_history()
+            if self.seg:
+                self.seg.inference.keep_history()
+            sampler = SystemSampler(rec)
+            sampler.start()
         while not glfw.window_should_close(self.win):
             glfw.poll_events()
             if self.args.seconds and time.perf_counter() - t_start >= self.args.seconds:
@@ -446,7 +461,11 @@ class App:
             frame = None
             pose_id, pose_result = self.pose.latest() if self.pose else (-1, None)
             if pose_id != last_pose_id:
+                t_pose = time.perf_counter()
                 self._update_pose(pose_id, pose_result)
+                if rec:
+                    rec.stage("retarget", (time.perf_counter() - t_pose) * 1000.0)
+                    rec.on_pose(t_pose, pose_result is not None)
                 last_pose_id = pose_id
                 if self.sync_video and pose_result is not None and pose_id > last_id:
                     frame = cam.get(pose_id)                    # o frame que gerou a pose: peça e vídeo juntos
@@ -458,7 +477,10 @@ class App:
                     self.mask_tex.write(mask)
                     last_mask_id = mask_id
             if frame is not None:
+                t_up = time.perf_counter()
                 self._upload_frame(frame.image)
+                if rec:
+                    rec.stage("upload_video", (time.perf_counter() - t_up) * 1000.0)
                 self._last_frame = frame
                 last_id = frame.id
             if self.seg:
@@ -466,6 +488,7 @@ class App:
             if self.demo_anim:
                 self._demo_pose(time.perf_counter() - t_start)
 
+            t_render = time.perf_counter()
             self._draw_scene()
             now = time.perf_counter()
             if self.show_hud:
@@ -480,20 +503,37 @@ class App:
                     and time.perf_counter() - t_start >= max(self.args.seconds - 0.2, 0.5)):
                 self._save_screenshot(self.args.screenshot)     # readback único, só para depuração
                 shot_done = True
+            t_swap = time.perf_counter()
             glfw.swap_buffers(self.win)
             finish_without_gil()                            # espera o vsync sem o GIL (gl_sync.py)
             self.render_rate.tick()
             t_now = time.perf_counter()
+            if rec:
+                rec.stage("render_cpu", (t_swap - t_render) * 1000.0)
+                rec.stage("swap_wait", (t_now - t_swap) * 1000.0)
+                rec.on_loop(t_now)
             if last_swap is not None:
                 self.frame_ms.add(t_now - last_swap)
             last_swap = t_now
             if self.t_switch is not None:
                 self.switch_ms = (t_now - self.t_switch) * 1000.0         # da tecla/clique até o frame na tela
+                if rec:
+                    rec.stage("troca_peca", self.switch_ms)
                 self.switch_max = max(self.switch_max, self.switch_ms)
                 self.t_switch = None
             if frame is not None:
-                self.latency.add(time.perf_counter() - frame.t_capture)
-        if self.args.seconds:
+                self.latency.add(t_now - frame.t_capture)
+                if rec:
+                    rec.on_video(t_now, (t_now - frame.t_capture) * 1000.0)
+        if rec:
+            rec.t_end = time.perf_counter()
+            sampler.stop()
+            rec.add_history("luz", self.light_ms.history)
+            rec.add_history("pose", self.pose.inference.history)
+            if self.seg:
+                rec.add_history("segmentacao", self.seg.inference.history)
+            rec.meta["fit_error_px"] = self.fit_error.mean
+        if self.args.seconds and not rec:
             print(f"FPS render {self.render_rate.rate:.1f} | FPS camera {cam.capture_rate.rate:.1f} | "
                   f"latencia {self.latency.mean_ms:.0f} ms (max {self.latency.max_ms:.0f})")
             if self.light_ms._samples:
@@ -517,7 +557,7 @@ class App:
         return 0
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Provador Virtual 3D")
     ap.add_argument("--camera-index", type=int, default=0)
     ap.add_argument("--width", type=int, default=1280)
@@ -533,8 +573,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--demo", action="store_true", help="começa com a animação de teste do LBS ligada")
     ap.add_argument("--screenshot", help="salva um PNG da tela perto do fim (use com --seconds)")
     ap.add_argument("--debug", action="store_true", help="liga a pose: esqueleto e métricas de pose/jitter")
-    args = ap.parse_args(argv)
-    return App(args).run()
+    return ap
+
+
+def main(argv: list[str] | None = None) -> int:
+    return App(build_parser().parse_args(argv)).run()
 
 
 if __name__ == "__main__":

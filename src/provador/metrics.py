@@ -35,13 +35,21 @@ class RateCounter:
 
 
 class LatencyStats:
-    """Média e máximo (em ms) das últimas N amostras."""
+    """Média e máximo (em ms) das últimas N amostras. Com keep_history(), guarda também todas como (t, ms)."""
 
     def __init__(self, size: int = 120):
         self._samples: deque[float] = deque(maxlen=size)
+        self.history: list[tuple[float, float]] | None = None
+
+    def keep_history(self) -> None:
+        if self.history is None:
+            self.history = []
 
     def add(self, seconds: float) -> None:
-        self._samples.append(seconds * 1000.0)
+        ms = seconds * 1000.0
+        self._samples.append(ms)
+        if self.history is not None:
+            self.history.append((time.perf_counter(), ms))
 
     @property
     def mean_ms(self) -> float:
