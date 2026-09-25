@@ -7,9 +7,10 @@ from . import paths
 from . import skeleton as sk
 from .camera import DEFAULT_HFOV, gl_bytes, perspective
 from .garment import Garment
+from .lighting import DEFAULT_LIGHT, Light
 
 SHADERS = paths.ROOT / "src" / "provador" / "shaders"
-LIGHT_DIR = (0.35, 0.6, 1.0)     # de cima, levemente à direita, vindo da câmera
+GRAIN = 0.02                     # amplitude do grão sobre a peça (0 = sem), combina com o ruído da webcam
 INFLATE = 0.012                  # m; dilatação da peça para cobrir a roupa real (T7)
 
 
@@ -19,8 +20,13 @@ def vertex_source() -> str:
     return f"{head}\n#define N_JOINTS {sk.N_JOINTS}\n{rest}"
 
 
+def sh_glsl() -> str:
+    """Função sh_eval() do GLSL; exige `uniform float sh[9];` declarado antes."""
+    return (SHADERS / "sh.glsl").read_text(encoding="utf-8")
+
+
 def fragment_source() -> str:
-    return (SHADERS / "garment.frag").read_text(encoding="utf-8")
+    return (SHADERS / "garment.frag").read_text(encoding="utf-8").replace("// @SH_EVAL@", sh_glsl(), 1)
 
 
 class GpuGarment:
@@ -53,14 +59,22 @@ class GarmentRenderer:
         self.ctx = ctx
         self.hfov = hfov
         self.prog = ctx.program(vertex_shader=vertex_source(), fragment_shader=fragment_source())
-        self.prog["light_dir"].value = LIGHT_DIR
         self.prog["mask"].value = 1
         self.inflate = INFLATE
+        self.grain = GRAIN
+        self._frame_no = 0
+        self.set_light(DEFAULT_LIGHT)
         self.current: GpuGarment | None = None
         self.set_pose(sk.skin_matrices(sk.world_matrices()), np.eye(4))
 
     def load(self, g: Garment) -> GpuGarment:
         return GpuGarment(self.ctx, self.prog, g)
+
+    def set_light(self, light: Light) -> None:
+        """Luz estimada (lighting.py): SH da forma, exposição e balanço de branco."""
+        self.prog["sh"].value = tuple(float(v) for v in light.sh)
+        self.prog["exposure"].value = float(light.exposure)
+        self.prog["tint"].value = tuple(float(v) for v in light.tint)
 
     def set_pose(self, skin_mats: np.ndarray, model: np.ndarray) -> None:
         """skin_mats: (N_JOINTS, 4, 4); model: 4x4 do espaço da peça para o da câmera."""
@@ -82,6 +96,8 @@ class GarmentRenderer:
         self.prog["use_mask"].value = False
         self.prog["mirror"].value = False
         self.prog["inflate"].value = 0.0
+        self.prog["grain"].value = 0.0
+        self.set_light(DEFAULT_LIGHT)
         self.prog["base_color"].value = tuple(garment.base_color)
         self.ctx.enable(moderngl.DEPTH_TEST)
         self.ctx.disable(moderngl.CULL_FACE | moderngl.BLEND)
@@ -103,6 +119,9 @@ class GarmentRenderer:
         self.prog["viewport"].value = (float(x), float(y), float(w), float(h))
         self.prog["use_mask"].value = use_mask
         self.prog["inflate"].value = self.inflate
+        self._frame_no += 1
+        self.prog["grain"].value = self.grain
+        self.prog["grain_seed"].value = float(self._frame_no % 997)
         self.prog["proj"].write(gl_bytes(perspective(self.hfov, w / h)))
         self.prog["mirror"].value = mirror
         self.prog["base_color"].value = tuple(self.current.base_color)

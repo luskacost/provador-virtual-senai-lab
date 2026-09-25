@@ -2,7 +2,8 @@
 
 Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug] [--garment pasta_ou.glb] [--hfov 70]
 Peças: ←/→ ou 1–9 ou clique nas miniaturas (assets/garments/*.glb; gere com tools/make_template.py --catalog)
-Teclas: Esc/Q sai · H HUD · U interface das peças · M espelho · G peça · S sincronia vídeo/pose · O oclusão
+Luz: estimada na pele a 10 Hz (lighting.py); L liga/desliga; --wb-strength e --grain ajustam.
+Teclas: Esc/Q sai · H HUD · L luz adaptativa · U interface das peças · M espelho · G peça · S sincronia vídeo/pose · O oclusão
         A animação de teste do LBS · K esqueleto e V cápsulas dos braços (--debug)
 A peça segue o corpo pela pose (retarget.py). --debug mostra o esqueleto e as métricas de pose/jitter.
 """
@@ -23,6 +24,7 @@ from .catalog import Selector, load_catalog
 from .debug_draw import SkeletonOverlay
 from .garment_render import GarmentRenderer
 from .gl_sync import finish_without_gil
+from .lighting import DEFAULT_LIGHT, LightEstimator
 from .metrics import JitterStats, LatencyStats, RateCounter, RunningMean
 from .occlusion import ArmOccluder
 from .pose import L_SHOULDER, R_SHOULDER, PoseResult, PoseWorker
@@ -38,6 +40,7 @@ HUD_WIDTH = 720
 HUD_LINE_H = 26
 HUD_REFRESH_S = 0.25         # o texto muda pouco: reenviar a textura só 4x/s
 MSAA_SAMPLES = 4
+LIGHT_PERIOD_S = 0.1          # a luz muda devagar: estimar 10x/s basta (e custa ~1 ms)
 # Posição fixa usada só pela animação de teste (tecla A); no uso normal o retarget posiciona a peça.
 STATIC_MODEL = sk.translation((0.0, -1.25, -1.7))
 
@@ -72,6 +75,12 @@ class App:
         self.selector = Selector(0)
         self.bar: GarmentBar | None = None
         self.show_ui = True
+        self.adaptive_light = not args.fixed_light
+        self.light_est = LightEstimator(wb_strength=args.wb_strength)
+        self.light_ms = LatencyStats()
+        self._last_frame = None
+        self._last_pose: PoseResult | None = None
+        self._last_light_t = 0.0
         self.t_switch: float | None = None
         self.switch_ms = 0.0
         self.switch_max = 0.0
@@ -130,6 +139,7 @@ class App:
 
     def _init_garment(self) -> None:
         self.garments = GarmentRenderer(self.ctx, hfov=self.args.hfov)
+        self.garments.grain = self.args.grain
         loaded, problems = load_catalog(self.args.garment)
         for msg in problems:
             print(f"[AVISO] peça ignorada: {msg}")
@@ -189,6 +199,9 @@ class App:
             glfw.set_window_should_close(win, True)
         elif key == glfw.KEY_H:
             self.show_hud = not self.show_hud
+        elif key == glfw.KEY_L:
+            self.adaptive_light = not self.adaptive_light
+            self.garments.set_light(self.light_est.light if self.adaptive_light else DEFAULT_LIGHT)
         elif key == glfw.KEY_U:
             self.show_ui = not self.show_ui
         elif key == glfw.KEY_RIGHT:
@@ -329,6 +342,11 @@ class App:
                 lines.append(f"Jitter ombros (desvio-padrao px): cru {self.jitter_raw.std_max:.2f}"
                              f" -> filtrado {self.jitter_filtered.std_max:.2f}")
         if self.garments and self.garments.current:
+            light = self.light_est.light if self.adaptive_light else DEFAULT_LIGHT
+            d = light.direction
+            lines.append(f"Luz {'adaptativa' if self.adaptive_light else 'FIXA'} (L) | exposicao {light.exposure:.2f} | "
+                         f"tinta R{light.tint[0]:.2f} G{light.tint[1]:.2f} B{light.tint[2]:.2f} | "
+                         f"dir {d[0]:+.1f},{d[1]:+.1f},{d[2]:+.1f} | {light.n_samples} amostras | {self.light_ms.mean_ms:.1f} ms")
             lines.append(f"Peca {self.selector.index + 1}/{self.selector.count}: {self.garments.current.name}"
                          f" | troca->tela {self.switch_ms:.0f} ms | quadro max {self.frame_ms.max_ms:.0f} ms")
             lines.append(f"<-/->, 1-9, clique | hFOV {self.garments.hfov:.0f} | G: peca | U: interface | "
@@ -336,9 +354,23 @@ class App:
         lines.append(f"Espelho {'ON' if self.mirror else 'OFF'} | H: HUD | M: espelho | K: esqueleto | Esc: sair")
         return lines
 
+    def _update_light(self, mask: np.ndarray | None) -> None:
+        """Reestima a luz (10 Hz) com o último quadro, a última pose e a última máscara."""
+        pose, frame = self._last_pose, self._last_frame
+        if not self.adaptive_light or pose is None or frame is None or mask is None:
+            return
+        now = time.perf_counter()
+        if now - self._last_light_t < LIGHT_PERIOD_S:
+            return
+        self._last_light_t = now
+        small = cv2.resize(frame.image, (256, 256), interpolation=cv2.INTER_AREA)
+        self.garments.set_light(self.light_est.update(small, mask, pose.px, pose.visibility, pose.image_size))
+        self.light_ms.add(time.perf_counter() - now)
+
     def _update_pose(self, frame_id: int, result: PoseResult | None) -> None:
         """Aplica um resultado de pose novo: retarget da peça, overlay e métricas."""
         self.person_found = result is not None
+        self._last_pose = result
         if result is None:
             self.fit = None
             self.occluder.update(None)
@@ -427,7 +459,10 @@ class App:
                     last_mask_id = mask_id
             if frame is not None:
                 self._upload_frame(frame.image)
+                self._last_frame = frame
                 last_id = frame.id
+            if self.seg:
+                self._update_light(self.seg.latest()[1])
             if self.demo_anim:
                 self._demo_pose(time.perf_counter() - t_start)
 
@@ -461,6 +496,10 @@ class App:
         if self.args.seconds:
             print(f"FPS render {self.render_rate.rate:.1f} | FPS camera {cam.capture_rate.rate:.1f} | "
                   f"latencia {self.latency.mean_ms:.0f} ms (max {self.latency.max_ms:.0f})")
+            if self.light_ms._samples:
+                lt = self.light_est.light
+                print(f"Luz exposicao {lt.exposure:.2f} | tinta {lt.tint.round(2)} | dir {lt.direction.round(2)} | "
+                      f"{lt.n_samples} amostras | estimativa {self.light_ms.mean_ms:.1f} ms")
             if self.gpu_garments:
                 print(f"Pecas {self.selector.count} | troca->tela max {self.switch_max:.0f} ms | "
                       f"quadro (media {self.frame_ms.mean_ms:.1f} / max {self.frame_ms.max_ms:.0f} ms)")
@@ -486,6 +525,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-mirror", action="store_true", help="não espelha a imagem")
     ap.add_argument("--seconds", type=float, default=0, help="fecha sozinho após N s e imprime as métricas")
     ap.add_argument("--garment", default=None, help="pasta de GLBs ou um GLB (padrão: assets/garments/)")
+    ap.add_argument("--fixed-light", action="store_true", help="começa com a luz fixa (sem estimar; tecla L alterna)")
+    ap.add_argument("--wb-strength", type=float, default=0.35, help="força do balanço de branco pela pele (0 = desliga)")
+    ap.add_argument("--grain", type=float, default=0.02, help="grão sobre a peça, combina com o ruído da webcam (0 = sem)")
     ap.add_argument("--cycle", type=float, default=0, help="troca de peça sozinho a cada N s (teste de desempenho)")
     ap.add_argument("--hfov", type=float, default=70.0, help="FOV horizontal da webcam em graus")
     ap.add_argument("--demo", action="store_true", help="começa com a animação de teste do LBS ligada")
