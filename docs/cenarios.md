@@ -66,3 +66,32 @@ Com o cenário desligado (modo "fundo real"), o passo 1–2 volta a ser o frame 
 ## Fora do escopo agora
 
 Vídeo em loop, cena 3D com paralaxe, sombras da pessoa projetadas no cenário, relighting completo da pessoa.
+
+---
+
+## Implementação (T7b, 25/09/2026)
+
+Entregue: fundo trocado pela máscara da pessoa, tecla **B** (real → cenário 1 → … → real) e **Shift+B** (volta), `--background N`
+para começar num cenário, quatro cenários de demonstração (`tools/make_backgrounds.py`) e suporte a imagens suas em
+`assets/backgrounds/<id>/background.jpg` (+ `meta.json` opcional). Um cenário inválido é pulado com aviso.
+
+Onde o código difere do plano acima (os nomes reais dos módulos e as escolhas técnicas):
+
+| Plano | Implementado | Por quê |
+|---|---|---|
+| `segmentation.py` | `segment.py` (já existia da T7) | só ganhou `latest_with_guide()`: o quadro reduzido que gerou a máscara |
+| `garments.py` como modelo | `backgrounds.py` (catálogo, `cover_scale`, `BackgroundSelector`) + `composite.py` | mesmo padrão de `catalog.py` |
+| guided filter (`cv2.ximgproc`) | ***joint bilateral upsampling* no shader** (`composite.frag`) | o guided filter na CPU refinaria só a máscara de 256×256; no shader cada pixel de 720p pondera os texels da máscara pela cor do próprio vídeo, e a borda segue a imagem real (teste: erro ≤ 1,5 px contra 3 px da ampliação simples) |
+| casamento em Lab (média e desvio) | média em RGB linear, ganho limitado a 0,75–1,35, `color_match` do `meta.json` | estável a 10 Hz e sem `Lab` no shader; o **mesmo ganho vai para a peça** (T10) e para o oclusor |
+| indicador em `ui.py` | linha "Cenario n/N" no HUD | o HUD já concentra as métricas |
+| `--sync-seg` | **não feito** | a máscara chega no mesmo ritmo da pose (~30 Hz); só valeria com movimento muito rápido |
+| erosão / feather | `smoothstep(0,35; 0,75)` sobre o alfa refinado | corta o halo de fundo sem serrilhar |
+
+O cenário **não é espelhado** (texto legível), mesmo com a câmera em modo espelho.
+
+Desempenho medido (`tools/benchmark.py --seconds 25 --cycle 0`, mesma sessão de câmera): fundo real 29,9 FPS efetivos e
+latência p95 de 30 ms; com cenário, 29,9 FPS e 31 ms. Diferença de FPS: 0,0.
+
+Limitações: a borda do cabelo escuro pode ficar com um leve tom do fundo original (a cor "vaza" no cabelo); cenários
+são imagens fixas (vídeo e cena 3D seguem fora do escopo); a pessoa continua iluminada pela sala real (só o tom é
+puxado em direção ao cenário).

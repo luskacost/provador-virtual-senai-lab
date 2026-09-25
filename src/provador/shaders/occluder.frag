@@ -5,6 +5,7 @@ uniform sampler2D mask;      // R pele do corpo, G cabelo, B rosto, A pessoa
 uniform vec4 viewport;       // x, y, w, h do video (letterbox) em pixels do framebuffer
 uniform bool mirror;
 uniform bool debug;
+uniform vec3 person_gain;    // casamento de cor da pessoa com o cenario (T7b); 1,1,1 = sem cenario
 in vec3 v_view;
 in vec3 v_normal;
 out vec4 color;
@@ -19,7 +20,7 @@ void main() {
     float core = smoothstep(0.45, 0.7, facing);
     float skin = smoothstep(0.3, 0.7, m.r);
     float a = max(skin, smoothstep(0.4, 0.8, m.a) * core);
-    vec3 rgb = texture(video, uv).rgb;
+    vec3 rgb = pow(pow(texture(video, uv).rgb, vec3(2.2)) * person_gain, vec3(1.0 / 2.2));
     if (debug) {
         rgb = mix(rgb, vec3(1.0, 0.2, 0.6), 0.45);
         a = max(a, 0.25);

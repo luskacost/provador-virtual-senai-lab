@@ -11,4 +11,5 @@ Projeto: **Provador Virtual 3D em tempo real** — webcam + Python sobrepõem pe
 - Ao concluir uma task, atualize o status em `docs/tasks.md`.
 - Ambiente: `tools\setup_env.bat` cria `.venv`; `python -m provador.check --camera` valida.
 - Desempenho: `python tools/benchmark.py --seconds 60` gera `docs/desempenho.md` (feche outros apps que usem a webcam; com pouca luz a webcam cai para 15 FPS).
+- Cenários atrás do usuário: `python tools/make_backgrounds.py` (tecla B no app; ver `docs/cenarios.md`).
 - Fotos → peça: `python tools/garment_from_photos.py --sheet folha.jpg --name "Nome"` (ver `docs/fotos.md`; fotos e GLBs `photo_*` ficam fora do git).

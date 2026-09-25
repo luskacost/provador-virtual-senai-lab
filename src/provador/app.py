@@ -3,7 +3,8 @@
 Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug] [--garment pasta_ou.glb] [--hfov 70]
 Peças: ←/→ ou 1–9 ou clique nas miniaturas (assets/garments/*.glb; gere com tools/make_template.py --catalog)
 Luz: estimada na pele a 10 Hz (lighting.py); L liga/desliga; --wb-strength e --grain ajustam.
-Teclas: Esc/Q sai · H HUD · L luz adaptativa · U interface das peças · M espelho · G peça · S sincronia vídeo/pose · O oclusão
+Cenários: B troca o fundo (real → cenário 1 → 2 …), Shift+B volta (assets/backgrounds/<id>/background.jpg).
+Teclas: Esc/Q sai · H HUD · B cenário · L luz adaptativa · U interface das peças · M espelho · G peça · S sincronia vídeo/pose · O oclusão
         A animação de teste do LBS · K esqueleto e V cápsulas dos braços (--debug)
 A peça segue o corpo pela pose (retarget.py). --debug mostra o esqueleto e as métricas de pose/jitter.
 """
@@ -19,13 +20,15 @@ import numpy as np
 
 from . import paths
 from . import skeleton as sk
+from .backgrounds import BackgroundSelector, cover_scale, load_backgrounds
 from .benchmark import SessionRecorder, SystemSampler
 from .capture import CameraThread
 from .catalog import Selector, load_catalog
+from .composite import Compositor, texture_from_bgr
 from .debug_draw import SkeletonOverlay
 from .garment_render import GarmentRenderer
 from .gl_sync import finish_without_gil
-from .lighting import DEFAULT_LIGHT, LightEstimator
+from .lighting import DEFAULT_LIGHT, LightEstimator, srgb_to_linear
 from .metrics import JitterStats, LatencyStats, RateCounter, RunningMean
 from .occlusion import ArmOccluder
 from .pose import L_SHOULDER, R_SHOULDER, PoseResult, PoseWorker
@@ -82,6 +85,14 @@ class App:
         self.light_est = LightEstimator(wb_strength=args.wb_strength)
         self.light_ms = LatencyStats()
         self.recorder: SessionRecorder | None = None      # definido por tools/benchmark.py
+        self.backgrounds: list = []
+        self.bg_textures: list = []
+        self.bg_selector = BackgroundSelector(0)
+        self.compositor: Compositor | None = None
+        self.guide_tex = None
+        self.mask_ready = False
+        self.person_gain = np.ones(3)
+        self._last_gain_t = 0.0
         self.gl_renderer = "?"
         self.t_loop_start = time.perf_counter()
         self._last_frame = None
@@ -143,6 +154,47 @@ class App:
         self.mask_tex = self.ctx.texture((256, 256), 4, np.zeros((256, 256, 4), np.uint8).tobytes())
         self.mask_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.mask_tex.repeat_x = self.mask_tex.repeat_y = False
+        self._init_backgrounds()
+
+    def _init_backgrounds(self) -> None:
+        loaded, problems = load_backgrounds(self.args.backgrounds)
+        for msg in problems:
+            print(f"[AVISO] cenário ignorado: {msg}")
+        self.backgrounds = loaded
+        self.bg_textures = [texture_from_bgr(self.ctx, b.image) for b in loaded]           # todos pré-carregados
+        self.bg_selector = BackgroundSelector(len(loaded))
+        self.bg_selector.index = min(max(self.args.background, 0), len(loaded)) - 1
+        self.compositor = Compositor(self.ctx)
+        self.guide_tex = texture_from_bgr(self.ctx, np.zeros((256, 256, 3), np.uint8), mipmaps=False, nearest=True)
+        print(f"Cenários: {len(loaded)} pré-carregados" if loaded else
+              "Cenários: nenhum (gere: python tools/make_backgrounds.py)")
+
+    def _step_background(self, delta: int) -> None:
+        if not self.backgrounds:
+            return
+        self.bg_selector.step(delta)
+        self.person_gain = np.ones(3)
+        if self.garments:
+            self.garments.set_scene_gain(self.person_gain)
+        self._last_gain_t = 0.0
+
+    def _update_scene_color(self, mask: np.ndarray | None, guide: np.ndarray | None) -> None:
+        """Puxa a cor da pessoa em direção à média do cenário (color_match), a 10 Hz e suavizado."""
+        if self.bg_selector.real or mask is None or guide is None:
+            return
+        now = time.perf_counter()
+        if now - self._last_gain_t < LIGHT_PERIOD_S:
+            return
+        self._last_gain_t = now
+        person = mask[..., 3] > 180
+        if person.sum() < 200:
+            return
+        bg = self.backgrounds[self.bg_selector.index]
+        person_mean = np.maximum(srgb_to_linear(guide[..., ::-1])[person].mean(axis=0), 1e-3)
+        target = np.clip((bg.mean_lin / person_mean) ** bg.color_match, 0.75, 1.35)
+        self.person_gain = 0.8 * self.person_gain + 0.2 * target
+        if self.garments:
+            self.garments.set_scene_gain(self.person_gain)
 
     def _init_garment(self) -> None:
         self.garments = GarmentRenderer(self.ctx, hfov=self.args.hfov)
@@ -209,6 +261,8 @@ class App:
         elif key == glfw.KEY_L:
             self.adaptive_light = not self.adaptive_light
             self.garments.set_light(self.light_est.light if self.adaptive_light else DEFAULT_LIGHT)
+        elif key == glfw.KEY_B:
+            self._step_background(-1 if mods & glfw.MOD_SHIFT else +1)
         elif key == glfw.KEY_U:
             self.show_ui = not self.show_ui
         elif key == glfw.KEY_RIGHT:
@@ -291,10 +345,17 @@ class App:
         x, y, w, h = letterbox(fb_w, fb_h, *self.video_tex.size)
         self.ctx.viewport = (x, y, w, h)
         self.ctx.disable(moderngl.BLEND)
-        self.prog["rect"].value = FULLSCREEN
-        self.prog["mirror"].value = self.mirror
-        self.video_tex.use(0)
-        self.vao.render(moderngl.TRIANGLE_STRIP, vertices=4)
+        use_bg = not self.bg_selector.real and self.seg is not None and self.mask_ready
+        if use_bg:
+            idx = self.bg_selector.index
+            bh, bw = self.backgrounds[idx].image.shape[:2]
+            self.compositor.draw(self.video_tex, self.mask_tex, self.guide_tex, self.bg_textures[idx], self.mirror,
+                                 cover_scale(bw, bh, w, h), self.person_gain)
+        else:
+            self.prog["rect"].value = FULLSCREEN
+            self.prog["mirror"].value = self.mirror
+            self.video_tex.use(0)
+            self.vao.render(moderngl.TRIANGLE_STRIP, vertices=4)
         if self.garments and self.show_garment and (self.fit is not None or self.demo_anim):
             use_mask = self.seg is not None and self.occlusion
             self.mask_tex.use(1)
@@ -302,7 +363,8 @@ class App:
             if use_mask and not self.demo_anim:
                 self.video_tex.use(0)
                 self.occluder.draw(self.garments.hfov, (x, y, w, h), self.mirror,
-                                   debug=self.show_proxies and self.args.debug)
+                                   debug=self.show_proxies and self.args.debug,
+                                   person_gain=self.person_gain if use_bg else (1.0, 1.0, 1.0))
         if self.skeleton and self.show_skeleton:
             self.skeleton.draw((w, h), self.mirror)
 
@@ -351,6 +413,14 @@ class App:
             if self.args.debug:
                 lines.append(f"Jitter ombros (desvio-padrao px): cru {self.jitter_raw.std_max:.2f}"
                              f" -> filtrado {self.jitter_filtered.std_max:.2f}")
+        if self.backgrounds:
+            if self.bg_selector.real:
+                lines.append(f"Cenario: fundo real (B: {len(self.backgrounds)} cenarios, Shift+B volta)")
+            else:
+                g = self.person_gain
+                lines.append(f"Cenario {self.bg_selector.index + 1}/{len(self.backgrounds)}: "
+                             f"{self.backgrounds[self.bg_selector.index].name} | cor R{g[0]:.2f} G{g[1]:.2f} B{g[2]:.2f} | "
+                             "B / Shift+B")
         if self.garments and self.garments.current:
             light = self.light_est.light if self.adaptive_light else DEFAULT_LIGHT
             d = light.direction
@@ -480,10 +550,13 @@ class App:
             if frame is None and not (self.sync_video and self.person_found):
                 frame = cam.latest(last_id)                     # sem pessoa (ou sem sincronia): o mais recente
             if self.seg:
-                mask_id, mask = self.seg.latest()
+                mask_id, mask, guide = self.seg.latest_with_guide()
                 if mask_id != last_mask_id and mask is not None:
                     self.mask_tex.write(mask)
+                    self.guide_tex.write(np.ascontiguousarray(guide))
+                    self.mask_ready = True
                     last_mask_id = mask_id
+                self._update_scene_color(mask, guide)
             if frame is not None:
                 t_up = time.perf_counter()
                 self._upload_frame(frame.image)
@@ -578,6 +651,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--grain", type=float, default=0.02, help="grão sobre a peça, combina com o ruído da webcam (0 = sem)")
     ap.add_argument("--camera-settings", action="store_true",
                     help="abre o diálogo de propriedades do driver da webcam (desligar compensação de pouca luz)")
+    ap.add_argument("--backgrounds", default=None, help="pasta de cenários (padrão: assets/backgrounds/)")
+    ap.add_argument("--background", type=int, default=0, help="cenário inicial (0 = fundo real, 1..n)")
     ap.add_argument("--cycle", type=float, default=0, help="troca de peça sozinho a cada N s (teste de desempenho)")
     ap.add_argument("--hfov", type=float, default=70.0, help="FOV horizontal da webcam em graus")
     ap.add_argument("--demo", action="store_true", help="começa com a animação de teste do LBS ligada")

@@ -70,12 +70,13 @@ def main() -> int:
     ap.add_argument("--charts-dir", default=str(paths.DOCS / "img"), help="pasta dos PNG dos gráficos")
     ap.add_argument("--no-charts", action="store_true")
     ap.add_argument("--camera-index", type=int, default=0)
+    ap.add_argument("--background", type=int, default=0, help="cenário durante a sessão (0 = fundo real, 1..n)")
     args = ap.parse_args()
 
     warmup = 3.0
     app_args = build_parser().parse_args([
         "--seconds", str(args.seconds + warmup), "--cycle", str(args.cycle),
-        "--camera-index", str(args.camera_index)])
+        "--camera-index", str(args.camera_index), "--background", str(args.background)])
     app = App(app_args)
     app.recorder = SessionRecorder()
     print(f"Benchmark de {args.seconds:.0f} s (+{warmup:.0f} s de aquecimento). Fique de frente para a câmera.")
@@ -95,6 +96,7 @@ def main() -> int:
             "Peças no catálogo": app.selector.count,
             "Troca de peça automática": f"a cada {args.cycle:g} s" if args.cycle else "desligada",
             "Segmentação": app.seg.provider if app.seg else "desligada",
+            "Cenário": (app.backgrounds[app.bg_selector.index].name if not app.bg_selector.real else "fundo real"),
             "Luz adaptativa": "ligada" if app.adaptive_light else "fixa",
             "FOV horizontal": f"{app_args.hfov:g}°",
             "Erro médio das articulações": f"{fit_error:.1f} px",

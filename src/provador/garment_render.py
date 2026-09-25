@@ -74,6 +74,8 @@ class GarmentRenderer:
         self.prog["albedo_tex"].value = 2
         self.inflate = INFLATE
         self.grain = GRAIN
+        self.scene_gain = (1.0, 1.0, 1.0)
+        self._light = DEFAULT_LIGHT
         self._frame_no = 0
         self.set_light(DEFAULT_LIGHT)
         self.current: GpuGarment | None = None
@@ -89,9 +91,15 @@ class GarmentRenderer:
 
     def set_light(self, light: Light) -> None:
         """Luz estimada (lighting.py): SH da forma, exposição e balanço de branco."""
+        self._light = light
         self.prog["sh"].value = tuple(float(v) for v in light.sh)
         self.prog["exposure"].value = float(light.exposure)
-        self.prog["tint"].value = tuple(float(v) for v in light.tint)
+        self.prog["tint"].value = tuple(float(v) * g for v, g in zip(light.tint, self.scene_gain, strict=True))
+
+    def set_scene_gain(self, gain) -> None:
+        """Ganho de cor do cenário (T7b): a peça acompanha a pessoa, que é puxada em direção ao tom do cenário."""
+        self.scene_gain = tuple(float(g) for g in gain)
+        self.set_light(self._light)
 
     def set_pose(self, skin_mats: np.ndarray, model: np.ndarray) -> None:
         """skin_mats: (N_JOINTS, 4, 4); model: 4x4 do espaço da peça para o da câmera."""

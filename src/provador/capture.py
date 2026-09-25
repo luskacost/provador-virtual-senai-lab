@@ -57,6 +57,9 @@ class CameraThread:
         cap.set(cv2.CAP_PROP_FPS, self.fps)
         cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        # O driver DirectShow guarda o modo de exposição entre execuções (outro app ou teste pode ter deixado em
+        # manual, e a imagem sai escura): pedir automática garante um estado conhecido.
+        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75)
         if self.settings_dialog:
             cap.set(cv2.CAP_PROP_SETTINGS, 1)      # diálogo do driver (DirectShow): compensação de pouca luz etc.
         self._cap = cap

@@ -44,11 +44,11 @@ Status: ✅ feito · 🔄 em andamento · ⬜ a fazer
 | T5 | P0 | ✅ | Renderer: GLB, LBS no vertex shader, projeção alinhada à webcam | Peça estática sobre o vídeo, MSAA, sem readback para a CPU |
 | T6 | P0 | ✅ | Retarget: tronco, ombros, braços; escala por ombros/tronco; torção ±30° | Erro médio <15 px entre articulações da peça e landmarks |
 | T7 | P0 | ✅ | Segmentação assíncrona + oclusão do braço + dilatação da peça | Braço cruzado à frente aparece sobre a peça, sem cintilar |
-| T7b | P1 | ⬜ | Cenários atrás do usuário (troca de fundo pela máscara), tecla B — ver [`cenarios.md`](cenarios.md) | Troca sem queda de FPS e sem halo visível nos ombros |
+| T7b | P1 | 🔄 | Cenários atrás do usuário (troca de fundo pela máscara), tecla B — ver [`cenarios.md`](cenarios.md) | Troca sem queda de FPS e sem halo visível nos ombros |
 | T8 | P0 | ✅ | Navegação: ←/→, teclas 1–9, miniaturas clicáveis, GLBs pré-carregados | Troca entre 5 peças <100 ms, sem queda de FPS |
 | T9 | P1 | 🔄 | `tools/garment_from_photos.py`: recorte, projeção na UV do template, `meta.json` | Fotos de uma peça real viram GLB com textura certa no app |
 | T10 | P1 | ✅ | Luz: SH ordem 2, exposição, balanço de branco, grão leve, PBR simples | A peça acompanha mudanças de luz do ambiente |
-| T11 | P1 | 🔄 | Métricas + `tools/benchmark.py` → `docs/desempenho.md` | Relatório gerado numa sessão de 60 s |
+| T11 | P1 | ✅ | Métricas + `tools/benchmark.py` → `docs/desempenho.md` | Relatório gerado numa sessão de 60 s |
 | T12 | P2 | ⬜ | `tools/blender_rig.py` + imagem→3D (TRELLIS ou Hunyuan3D) | Jaqueta gerada por IA, rigada, funcionando no app |
 | T13 | P2 | ⬜ | Plano B de desempenho: rtmlib RTMW no onnxruntime-gpu (DirectML em AMD) | `--pose-backend rtmw` + benchmark comparativo |
 | T14 | P2 | ⬜ | Navegação por gesto (pinça, MediaPipe Hands) | Sem falsos positivos em 1 min |

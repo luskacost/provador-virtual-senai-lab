@@ -108,7 +108,8 @@ class ArmOccluder:
             slot[3] = len(mats)
         self.visible = True
 
-    def draw(self, hfov: float, viewport: tuple[int, int, int, int], mirror: bool, debug: bool = False) -> None:
+    def draw(self, hfov: float, viewport: tuple[int, int, int, int], mirror: bool, debug: bool = False,
+             person_gain=(1.0, 1.0, 1.0)) -> None:
         """Depois da peça, com o buffer de profundidade dela. video/mask já ligados nas unidades 0 e 1."""
         if not self.visible:
             return
@@ -117,6 +118,7 @@ class ArmOccluder:
         self.prog["viewport"].value = (float(x), float(y), float(w), float(h))
         self.prog["mirror"].value = mirror
         self.prog["debug"].value = debug
+        self.prog["person_gain"].value = tuple(float(g) for g in person_gain)
         self.ctx.enable(moderngl.DEPTH_TEST | moderngl.BLEND)
         self.ctx.blend_func = moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA
         self.ctx.depth_mask = False                    # não atrapalha a profundidade da peça

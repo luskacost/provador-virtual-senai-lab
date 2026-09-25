@@ -66,6 +66,7 @@ class SegWorker:
         self.error: str | None = None
         self._lock = threading.Lock()
         self._mask: np.ndarray | None = None
+        self._guide: np.ndarray | None = None       # quadro reduzido (BGR 256x256) que gerou a máscara
         self._mask_id = -1
         self._stop = threading.Event()
         self._ready = threading.Event()
@@ -83,6 +84,11 @@ class SegWorker:
         """(contador de máscaras publicadas, máscara RGBA uint8 (256, 256, 4) ou None)."""
         with self._lock:
             return self._mask_id, self._mask
+
+    def latest_with_guide(self) -> tuple[int, np.ndarray | None, np.ndarray | None]:
+        """Como latest(), mais o quadro reduzido BGR (256, 256, 3) que gerou a máscara (guia do refinamento)."""
+        with self._lock:
+            return self._mask_id, self._mask, self._guide
 
     def stop(self) -> None:
         self._stop.set()
@@ -122,7 +128,7 @@ class SegWorker:
                 mask = np.clip(smooth * 255.0 + 0.5, 0, 255).astype(np.uint8)
                 count += 1
                 with self._lock:
-                    self._mask, self._mask_id = mask, count
+                    self._mask, self._mask_id, self._guide = mask, count, small
                 self.rate.tick()
         except Exception as exc:  # noqa: BLE001
             self.error = f"a segmentação parou ({exc.__class__.__name__}: {exc})"

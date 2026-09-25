@@ -8,6 +8,7 @@ ASSETS = ROOT / "assets"
 GARMENTS = ASSETS / "garments"
 TEMPLATES = ASSETS / "templates"
 DOCS = ROOT / "docs"
+BACKGROUNDS = ASSETS / "backgrounds"
 
 POSE_MODEL = MODELS / "pose_landmarker_full.task"
 SEG_MODEL = MODELS / "selfie_multiclass_256x256.tflite"
