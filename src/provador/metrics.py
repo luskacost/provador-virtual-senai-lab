@@ -1,5 +1,6 @@
 """Métricas leves de desempenho (FPS e latência), sem dependências de GL ou câmera."""
 
+import statistics
 import time
 from collections import deque
 
@@ -49,3 +50,27 @@ class LatencyStats:
     @property
     def max_ms(self) -> float:
         return max(self._samples) if self._samples else 0.0
+
+
+class JitterStats:
+    """Desvio-padrão (na unidade da amostra) de um vetor de coordenadas nas últimas N amostras.
+
+    Com a pessoa parada, mede o tremor: usa-se o pior canal (ex.: x e y de cada ombro).
+    """
+
+    def __init__(self, size: int = 90):
+        self._samples: deque[tuple[float, ...]] = deque(maxlen=size)
+
+    def add(self, values) -> None:
+        self._samples.append(tuple(float(v) for v in values))
+
+    def reset(self) -> None:
+        self._samples.clear()
+
+    @property
+    def std_max(self) -> float:
+        """Pior desvio-padrão entre os canais. Precisa de ao menos 10 amostras; senão, 0."""
+        if len(self._samples) < 10:
+            return 0.0
+        cols = list(zip(*self._samples, strict=True))
+        return max(statistics.pstdev(c) for c in cols)

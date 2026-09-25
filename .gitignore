@@ -8,3 +8,4 @@ models/*.task
 models/*.tflite
 docs/hardware_raw.txt
 benchmarks/
+exec.txt

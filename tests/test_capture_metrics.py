@@ -63,3 +63,17 @@ def test_latest_so_entrega_frame_novo():
     cam._frame = Frame(5, np.zeros((2, 2, 3), np.uint8), 0.0)
     assert cam.latest(4).id == 5
     assert cam.latest(5) is None
+
+
+def test_jitter_stats():
+    from provador.metrics import JitterStats
+
+    js = JitterStats()
+    for _ in range(5):
+        js.add((100.0, 200.0))
+    assert js.std_max == 0.0                      # poucas amostras
+    for i in range(20):
+        js.add((100.0 + (2.0 if i % 2 else -2.0), 200.0))
+    assert 1.5 < js.std_max < 2.5                 # pior canal é o x, com oscilação de ±2
+    js.reset()
+    assert js.std_max == 0.0
