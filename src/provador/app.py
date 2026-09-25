@@ -1,8 +1,8 @@
 """App do Provador Virtual 3D: webcam + peça 3D rigada (LBS na GPU) + HUD.
 
 Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug] [--garment x.glb] [--hfov 70]
-Teclas: Esc/Q sai · H HUD · M espelho · G peça · S sincronia vídeo/pose · A animação de teste do LBS
-        K esqueleto (--debug)
+Teclas: Esc/Q sai · H HUD · M espelho · G peça · S sincronia vídeo/pose · O oclusão dos braços
+        A animação de teste do LBS · K esqueleto e V cápsulas dos braços (--debug)
 A peça segue o corpo pela pose (retarget.py). --debug mostra o esqueleto e as métricas de pose/jitter.
 """
 
@@ -23,13 +23,15 @@ from .garment import load_glb
 from .garment_render import GarmentRenderer
 from .gl_sync import finish_without_gil
 from .metrics import JitterStats, LatencyStats, RateCounter, RunningMean
+from .occlusion import ArmOccluder
 from .pose import L_SHOULDER, R_SHOULDER, PoseResult, PoseWorker
 from .retarget import Retarget, joint_error_px, retarget
+from .segment import SegWorker
 from .viewport import letterbox
 
 SHADERS = paths.ROOT / "src" / "provador" / "shaders"
 FULLSCREEN = (-1.0, -1.0, 1.0, 1.0)
-HUD_WIDTH = 560
+HUD_WIDTH = 720
 HUD_LINE_H = 26
 HUD_REFRESH_S = 0.25         # o texto muda pouco: reenviar a textura só 4x/s
 MSAA_SAMPLES = 4
@@ -68,6 +70,11 @@ class App:
         self.sync_video = True
         self.fit: Retarget | None = None
         self.fit_error = RunningMean()
+        self.seg: SegWorker | None = None
+        self.occlusion = True
+        self.show_proxies = False
+        self.occluder: ArmOccluder | None = None
+        self.mask_tex = None
         self.render_rate = RateCounter()
         self.latency = LatencyStats()
         self.win = None
@@ -104,6 +111,10 @@ class App:
         if self.args.debug:
             self.skeleton = SkeletonOverlay(self.ctx)
         self._init_garment()
+        self.occluder = ArmOccluder(self.ctx)
+        self.mask_tex = self.ctx.texture((256, 256), 4, np.zeros((256, 256, 4), np.uint8).tobytes())
+        self.mask_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        self.mask_tex.repeat_x = self.mask_tex.repeat_y = False
 
     def _init_garment(self) -> None:
         self.garments = GarmentRenderer(self.ctx, hfov=self.args.hfov)
@@ -139,6 +150,10 @@ class App:
             self.show_garment = not self.show_garment
         elif key == glfw.KEY_A and self.garments:
             self.demo_anim = not self.demo_anim
+        elif key == glfw.KEY_O:
+            self.occlusion = not self.occlusion
+        elif key == glfw.KEY_V:
+            self.show_proxies = not self.show_proxies
         elif key == glfw.KEY_S:
             self.sync_video = not self.sync_video
 
@@ -204,7 +219,13 @@ class App:
         self.video_tex.use(0)
         self.vao.render(moderngl.TRIANGLE_STRIP, vertices=4)
         if self.garments and self.show_garment and (self.fit is not None or self.demo_anim):
-            self.garments.draw((w, h), self.mirror)
+            use_mask = self.seg is not None and self.occlusion
+            self.mask_tex.use(1)
+            self.garments.draw((x, y, w, h), self.mirror, use_mask)
+            if use_mask and not self.demo_anim:
+                self.video_tex.use(0)
+                self.occluder.draw(self.garments.hfov, (x, y, w, h), self.mirror,
+                                   debug=self.show_proxies and self.args.debug)
         if self.skeleton and self.show_skeleton:
             self.skeleton.draw((w, h), self.mirror)
 
@@ -238,6 +259,10 @@ class App:
             lines.append(f"Ajuste: {self.fit.depth:.2f} m | escala {self.fit.scale[0]:.2f}/{self.fit.scale[1]:.2f}"
                          f" | giro {self.fit.yaw_deg:+.0f} torcao {self.fit.twist_deg:+.0f} | "
                          f"erro {self.fit_error.mean:.1f} px")
+        if self.seg:
+            lines.append(f"Segmentacao {self.seg.rate.rate:5.1f} Hz | {self.seg.inference.mean_ms:4.1f} ms | "
+                         f"{self.seg.provider} | O: oclusao {'ON' if self.occlusion else 'OFF'}"
+                         + (f" | V: capsulas {'ON' if self.show_proxies else 'OFF'}" if self.args.debug else ""))
         if self.pose and self.pose.error:
             lines.append(f"POSE: {self.pose.error}")
         elif self.pose:
@@ -258,6 +283,7 @@ class App:
         self.person_found = result is not None
         if result is None:
             self.fit = None
+            self.occluder.update(None)
             if self.skeleton:
                 self.skeleton.clear()
             self.jitter_raw.reset()
@@ -267,6 +293,7 @@ class App:
         self.fit_error.add(joint_error_px(self.fit, result.px_raw, self.args.hfov, result.image_size))
         if self.garments and not self.demo_anim:
             self.garments.set_pose(self.fit.skin, np.eye(4))
+        self.occluder.update(self.fit.points, self.fit.scale[0])
         if self.skeleton:
             self.skeleton.update(result.px, result.visibility, result.image_size)
         shoulders = (L_SHOULDER, R_SHOULDER)
@@ -289,11 +316,18 @@ class App:
         try:
             self._init_window()
             self.pose = PoseWorker(cam).start()
+            try:
+                self.seg = SegWorker(cam).start()
+                print(f"Segmentacao: {self.seg.provider}")
+            except RuntimeError as exc:
+                print(f"[AVISO] {exc} (segue sem oclusao)")
             return self._loop(cam)
         except RuntimeError as exc:
             print(f"[ERRO] {exc}")
             return 1
         finally:
+            if self.seg:
+                self.seg.stop()
             if self.pose:
                 self.pose.stop()
             cam.stop()
@@ -304,6 +338,7 @@ class App:
     def _loop(self, cam: CameraThread) -> int:
         last_id = -1
         last_pose_id = -1
+        last_mask_id = -1
         last_hud = 0.0
         t_start = time.perf_counter()
         shot_done = False
@@ -321,6 +356,11 @@ class App:
                     frame = cam.get(pose_id)                    # o frame que gerou a pose: peça e vídeo juntos
             if frame is None and not (self.sync_video and self.person_found):
                 frame = cam.latest(last_id)                     # sem pessoa (ou sem sincronia): o mais recente
+            if self.seg:
+                mask_id, mask = self.seg.latest()
+                if mask_id != last_mask_id and mask is not None:
+                    self.mask_tex.write(mask)
+                    last_mask_id = mask_id
             if frame is not None:
                 self._upload_frame(frame.image)
                 last_id = frame.id
@@ -351,6 +391,9 @@ class App:
                 print(f"Ajuste {self.fit.depth:.2f} m | escala {self.fit.scale[0]:.2f}/{self.fit.scale[1]:.2f} | "
                       f"giro {self.fit.yaw_deg:+.0f} | torcao {self.fit.twist_deg:+.0f} | "
                       f"erro articulacoes {self.fit_error.mean:.1f} px")
+            if self.seg:
+                print(f"Segmentacao {self.seg.rate.rate:.1f} Hz | {self.seg.inference.mean_ms:.1f} ms | "
+                      f"{self.seg.provider}")
             if self.pose:
                 print(f"Pose {self.pose.rate.rate:.1f} Hz | inferencia {self.pose.inference.mean_ms:.1f} ms | "
                       f"pessoa {'sim' if self.person_found else 'NAO'} | jitter ombros px: "

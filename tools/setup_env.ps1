@@ -53,5 +53,8 @@ if ($uv) {
 Write-Host "Baixando modelos do MediaPipe..." -ForegroundColor Cyan
 & $venvPy tools\download_models.py
 
+Write-Host "Convertendo o segmentador para ONNX (GPU)..." -ForegroundColor Cyan
+& $venvPy tools\convert_seg_model.py
+
 Write-Host "`nVerificacao do ambiente:" -ForegroundColor Cyan
 & $venvPy -m provador.check --camera

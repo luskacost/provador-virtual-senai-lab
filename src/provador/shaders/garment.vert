@@ -10,6 +10,7 @@ uniform mat4 bones[N_JOINTS];   // matrizes de skinning (mundo do osso x inversa
 uniform mat4 model;             // espaco da peca -> espaco da camera
 uniform mat4 proj;              // projecao alinhada a webcam
 uniform bool mirror;
+uniform float inflate;          // dilatacao (m) ao longo da normal: cobre a roupa real
 
 out vec3 v_view;                // posicao no espaco da camera (tambem capturada no teste)
 out vec3 v_normal;
@@ -20,7 +21,7 @@ void main() {
               + in_weights.y * bones[in_joints.y]
               + in_weights.z * bones[in_joints.z]
               + in_weights.w * bones[in_joints.w];
-    vec4 p = model * (skin * vec4(in_pos, 1.0));
+    vec4 p = model * (skin * vec4(in_pos + in_normal * inflate, 1.0));
     v_view = p.xyz;
     v_normal = mat3(model) * (mat3(skin) * in_normal);   // sem escala nao uniforme: nao precisa da inversa
     v_uv = in_uv;

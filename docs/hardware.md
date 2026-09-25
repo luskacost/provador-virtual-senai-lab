@@ -33,3 +33,8 @@ A VRAM dedicada é de 6 GB. Isso é suficiente para o app, mas apertado para ima
    chamadas GL, e o ModernGL segura o GIL nessa espera. A inferência da pose ia de 15 para 33 ms. Corrigido com
    `glFinish` via ctypes logo após o swap (`src/provador/gl_sync.py`), que espera sem o GIL. Regra: nenhuma
    espera longa dentro de chamadas do ModernGL no loop de render.
+7. **Segmentação na GPU (T7):** o selfie multiclasse do MediaPipe leva ~82 ms na CPU desta máquina (o plano
+   previa 12 ms), em qualquer resolução de entrada. Convertido para ONNX (`tools/convert_seg_model.py`, via
+   tf2onnx num ambiente temporário) e rodando em ONNX Runtime + DirectML na NVIDIA: **~5 ms**, com 99,8% de
+   concordância de classes com o MediaPipe. Reserva: ONNX Runtime na CPU (~30 ms). Antecipa a ideia da T13 só
+   para a segmentação; a pose continua no MediaPipe (15 ms).

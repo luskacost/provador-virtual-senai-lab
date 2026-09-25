@@ -10,6 +10,7 @@ from .garment import Garment
 
 SHADERS = paths.ROOT / "src" / "provador" / "shaders"
 LIGHT_DIR = (0.35, 0.6, 1.0)     # de cima, levemente à direita, vindo da câmera
+INFLATE = 0.012                  # m; dilatação da peça para cobrir a roupa real (T7)
 
 
 def vertex_source() -> str:
@@ -53,6 +54,8 @@ class GarmentRenderer:
         self.hfov = hfov
         self.prog = ctx.program(vertex_shader=vertex_source(), fragment_shader=fragment_source())
         self.prog["light_dir"].value = LIGHT_DIR
+        self.prog["mask"].value = 1
+        self.inflate = INFLATE
         self.current: GpuGarment | None = None
         self.set_pose(sk.skin_matrices(sk.world_matrices()), np.eye(4))
 
@@ -64,15 +67,21 @@ class GarmentRenderer:
         self.prog["bones"].write(gl_bytes(skin_mats))
         self.prog["model"].write(gl_bytes(model))
 
-    def draw(self, viewport_size: tuple[int, int], mirror: bool) -> None:
-        """Desenha a peça atual. O viewport do GL já deve ser a área (letterbox) do vídeo."""
+    def draw(self, viewport: tuple[int, int, int, int], mirror: bool, use_mask: bool = False) -> None:
+        """Desenha a peça atual. O viewport do GL já deve ser a área (letterbox) do vídeo; com use_mask, a
+        máscara da segmentação precisa estar ligada na unidade 1."""
         if self.current is None:
             return
-        w, h = viewport_size
+        x, y, w, h = viewport
+        self.prog["viewport"].value = (float(x), float(y), float(w), float(h))
+        self.prog["use_mask"].value = use_mask
+        self.prog["inflate"].value = self.inflate
         self.prog["proj"].write(gl_bytes(perspective(self.hfov, w / h)))
         self.prog["mirror"].value = mirror
         self.prog["base_color"].value = tuple(self.current.base_color)
         self.ctx.enable(moderngl.DEPTH_TEST)
-        self.ctx.disable(moderngl.CULL_FACE | moderngl.BLEND)   # casca aberta: os dois lados aparecem
+        self.ctx.disable(moderngl.CULL_FACE)       # casca aberta: o lado de dentro é tratado no shader
+        self.ctx.enable(moderngl.BLEND)            # alfa < 1 onde cabelo/rosto passam por cima
+        self.ctx.blend_func = moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA
         self.current.vao.render(moderngl.TRIANGLES)
-        self.ctx.disable(moderngl.DEPTH_TEST)
+        self.ctx.disable(moderngl.DEPTH_TEST | moderngl.BLEND)

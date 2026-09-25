@@ -46,6 +46,7 @@ class Retarget:
     scale: tuple[float, float]  # (largura, altura) do tronco relativas ao template
     yaw_deg: float            # giro do peito em torno do eixo vertical (0 = de frente)
     twist_deg: float          # torção peito × quadril
+    points: np.ndarray        # (33, 3) landmarks no espaço da câmera (para a oclusão)
 
 
 def _norm(v: np.ndarray) -> np.ndarray:
@@ -166,6 +167,7 @@ def retarget(px: np.ndarray, world: np.ndarray, vis: np.ndarray, image_size: tup
         scale=(float(sx), float(sy)),
         yaw_deg=_yaw_deg(x_chest),
         twist_deg=float(twist),
+        points=P,
     )
 
 

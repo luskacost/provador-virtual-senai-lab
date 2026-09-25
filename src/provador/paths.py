@@ -11,6 +11,7 @@ DOCS = ROOT / "docs"
 
 POSE_MODEL = MODELS / "pose_landmarker_full.task"
 SEG_MODEL = MODELS / "selfie_multiclass_256x256.tflite"
+SEG_ONNX = MODELS / "selfie_multiclass_256x256.onnx"   # gerado por tools/convert_seg_model.py
 
 MODEL_URLS = {
     POSE_MODEL: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/"

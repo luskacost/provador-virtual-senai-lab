@@ -6,6 +6,7 @@ __pycache__/
 *.egg-info/
 models/*.task
 models/*.tflite
+models/*.onnx
 docs/hardware_raw.txt
 benchmarks/
 exec.txt

@@ -145,6 +145,10 @@ def check_models() -> None:
             print(f"{OK} modelo {path.name} ({path.stat().st_size / 1e6:.1f} MB)")
         else:
             print(f"{WARN} modelo {path.name} ausente -> python tools/download_models.py")
+    if paths.SEG_ONNX.exists():
+        print(f"{OK} modelo {paths.SEG_ONNX.name} ({paths.SEG_ONNX.stat().st_size / 1e6:.1f} MB)")
+    else:
+        print(f"{WARN} modelo {paths.SEG_ONNX.name} ausente -> python tools/convert_seg_model.py")
 
 
 def check_camera(index: int = 0, seconds: float = 3.0) -> bool:
