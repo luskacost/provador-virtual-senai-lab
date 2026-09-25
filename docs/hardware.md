@@ -29,3 +29,7 @@ A VRAM dedicada é de 6 GB. Isso é suficiente para o app, mas apertado para ima
 4. **Webcam:** o driver mede ~30 FPS. Se a redução de tremulação do driver adicionar latência, avaliar desligá-la
    na T2, quando houver métrica de latência.
 5. **T12 com 6 GB de VRAM:** pode exigir versões quantizadas ou rodar em nuvem. Decidir só quando a T12 começar.
+6. **GIL × vsync (descoberto na T5):** com vsync, o driver NVIDIA bloqueia a thread de render dentro das
+   chamadas GL, e o ModernGL segura o GIL nessa espera. A inferência da pose ia de 15 para 33 ms. Corrigido com
+   `glFinish` via ctypes logo após o swap (`src/provador/gl_sync.py`), que espera sem o GIL. Regra: nenhuma
+   espera longa dentro de chamadas do ModernGL no loop de render.

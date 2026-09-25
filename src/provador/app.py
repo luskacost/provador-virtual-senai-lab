@@ -1,7 +1,7 @@
-"""App do Provador Virtual 3D. T2: webcam em thread + janela GLFW/ModernGL + HUD de FPS.
+"""App do Provador Virtual 3D: webcam + peça 3D rigada (LBS na GPU) + HUD.
 
-Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug]
-Teclas: Esc/Q sai · H liga/desliga o HUD · M espelha/desespelha · K liga/desliga o esqueleto (--debug)
+Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug] [--garment x.glb] [--hfov 70]
+Teclas: Esc/Q sai · H HUD · M espelho · G peça · A animação de teste do LBS · K esqueleto (--debug)
 --debug liga a pose (T3): esqueleto sobre o vídeo e métricas de pose e jitter no HUD.
 """
 
@@ -15,8 +15,12 @@ import moderngl
 import numpy as np
 
 from . import paths
+from . import skeleton as sk
 from .capture import CameraThread
 from .debug_draw import SkeletonOverlay
+from .garment import load_glb
+from .garment_render import GarmentRenderer
+from .gl_sync import finish_without_gil
 from .metrics import JitterStats, LatencyStats, RateCounter
 from .pose import L_SHOULDER, R_SHOULDER, PoseWorker
 from .viewport import letterbox
@@ -26,6 +30,9 @@ FULLSCREEN = (-1.0, -1.0, 1.0, 1.0)
 HUD_WIDTH = 560
 HUD_LINE_H = 26
 HUD_REFRESH_S = 0.25         # o texto muda pouco: reenviar a textura só 4x/s
+MSAA_SAMPLES = 4
+# T5: peça estática à frente da câmera (quadril do esqueleto em y=1,0 m). A T6 troca pelo retarget.
+STATIC_MODEL = sk.translation((0.0, -1.25, -1.7))
 
 
 def _read_shader(name: str) -> str:
@@ -53,6 +60,9 @@ class App:
         self.jitter_raw = JitterStats()
         self.jitter_filtered = JitterStats()
         self.person_found = False
+        self.garments: GarmentRenderer | None = None
+        self.show_garment = True
+        self.demo_anim = args.demo
         self.render_rate = RateCounter()
         self.latency = LatencyStats()
         self.win = None
@@ -85,8 +95,30 @@ class App:
         self.prog["tex"].value = 0
         self.video_tex = None
         self.hud_tex = None
+        self.msaa: moderngl.Framebuffer | None = None
         if self.args.debug:
             self.skeleton = SkeletonOverlay(self.ctx)
+        self._init_garment()
+
+    def _init_garment(self) -> None:
+        self.garments = GarmentRenderer(self.ctx, hfov=self.args.hfov)
+        path = self.args.garment
+        try:
+            self.garments.current = self.garments.load(load_glb(path))
+        except (OSError, ValueError) as exc:
+            print(f"[AVISO] peça não carregada ({exc}). Gere o template: python tools/make_template.py")
+            return
+        self.garments.set_pose(sk.skin_matrices(sk.world_matrices()), STATIC_MODEL)
+        print(f"Peça: {self.garments.current.name}")
+
+    def _demo_pose(self, t: float) -> None:
+        """Anima os ossos (sem pose da webcam) para conferir o LBS na GPU."""
+        rots = np.broadcast_to(np.eye(3), (sk.N_JOINTS, 3, 3)).copy()
+        s = np.sin(t * 2.0)
+        rots[sk.INDEX["L_upper_arm"]] = sk.rotation_axis_angle((0, 0, 1), -35 + 55 * s)
+        rots[sk.INDEX["R_upper_arm"]] = sk.rotation_axis_angle((0, 0, 1), 35 + 55 * s)
+        rots[sk.INDEX["spine"]] = sk.rotation_axis_angle((0, 1, 0), 25 * np.sin(t * 0.9))
+        self.garments.set_pose(sk.skin_matrices(sk.world_matrices(rots)), STATIC_MODEL)
 
     def _on_key(self, win, key, scancode, action, mods) -> None:
         if action != glfw.PRESS:
@@ -99,6 +131,12 @@ class App:
             self.mirror = not self.mirror
         elif key == glfw.KEY_K:
             self.show_skeleton = not self.show_skeleton
+        elif key == glfw.KEY_G:
+            self.show_garment = not self.show_garment
+        elif key == glfw.KEY_A and self.garments:
+            self.demo_anim = not self.demo_anim
+            if not self.demo_anim:
+                self.garments.set_pose(sk.skin_matrices(sk.world_matrices()), STATIC_MODEL)
 
     def _upload_hud(self, image: np.ndarray) -> None:
         h, w = image.shape[:2]
@@ -121,11 +159,38 @@ class App:
         self.video_tex.write(image, alignment=1)
 
     # --- desenho -----------------------------------------------------------------------------
-    def _draw_video(self) -> None:
+    def _msaa_target(self, size: tuple[int, int]) -> moderngl.Framebuffer:
+        """Framebuffer MSAA (cor + profundidade) do tamanho da janela; recriado só quando ela muda."""
+        if self.msaa is None or self.msaa.size != size:
+            if self.msaa is not None:
+                for att in (*self.msaa.color_attachments, self.msaa.depth_attachment):
+                    att.release()
+                self.msaa.release()
+            self.msaa = self.ctx.framebuffer(
+                color_attachments=[self.ctx.renderbuffer(size, 4, samples=MSAA_SAMPLES)],
+                depth_attachment=self.ctx.depth_renderbuffer(size, samples=MSAA_SAMPLES),
+            )
+            print(f"MSAA {self.msaa.samples}x em {size[0]}x{size[1]}")
+        return self.msaa
+
+    def _draw_scene(self) -> None:
+        """Vídeo + peça + esqueleto no framebuffer MSAA, resolvido na tela por blit (tudo na GPU)."""
         fb_w, fb_h = glfw.get_framebuffer_size(self.win)
+        self.ctx.screen.use()
         self.ctx.viewport = (0, 0, fb_w, fb_h)
         self.ctx.clear(0.0, 0.0, 0.0)
-        if self.video_tex is None or fb_w == 0 or fb_h == 0:
+        if fb_w == 0 or fb_h == 0:
+            return
+        target = self._msaa_target((fb_w, fb_h))
+        target.use()
+        self.ctx.viewport = (0, 0, fb_w, fb_h)
+        target.clear(0.0, 0.0, 0.0, 1.0, depth=1.0)
+        self._draw_video(fb_w, fb_h)
+        self.ctx.copy_framebuffer(self.ctx.screen, target)
+        self.ctx.screen.use()
+
+    def _draw_video(self, fb_w: int, fb_h: int) -> None:
+        if self.video_tex is None:
             return
         x, y, w, h = letterbox(fb_w, fb_h, *self.video_tex.size)
         self.ctx.viewport = (x, y, w, h)
@@ -134,11 +199,14 @@ class App:
         self.prog["mirror"].value = self.mirror
         self.video_tex.use(0)
         self.vao.render(moderngl.TRIANGLE_STRIP, vertices=4)
+        if self.garments and self.show_garment:
+            self.garments.draw((w, h), self.mirror)
         if self.skeleton and self.show_skeleton:
             self.skeleton.draw((w, h), self.mirror)
 
     def _draw_hud(self) -> None:
         fb_w, fb_h = glfw.get_framebuffer_size(self.win)
+        self.ctx.screen.use()
         if fb_w == 0 or fb_h == 0 or self.hud_tex is None:
             return
         hud_w, hud_h = self.hud_tex.size
@@ -172,6 +240,9 @@ class App:
                     (f"Jitter ombros (desvio-padrao px): cru {self.jitter_raw.std_max:.2f}"
                      f" -> filtrado {self.jitter_filtered.std_max:.2f}"),
                 ]
+        if self.garments and self.garments.current:
+            lines.append(f"Peca: {self.garments.current.name} | hFOV {self.garments.hfov:.0f} | "
+                         f"G: peca | A: animacao {'ON' if self.demo_anim else 'OFF'}")
         lines.append(f"Espelho {'ON' if self.mirror else 'OFF'} | H: HUD | M: espelho | K: esqueleto | Esc: sair")
         return lines
 
@@ -191,6 +262,12 @@ class App:
         self.jitter_raw.add(result.px_raw[shoulders, :2].ravel())
         self.jitter_filtered.add(result.px[shoulders, :2].ravel())
         return frame_id
+
+    def _save_screenshot(self, path: str) -> None:
+        fb_w, fb_h = glfw.get_framebuffer_size(self.win)
+        img = np.frombuffer(self.ctx.screen.read(viewport=(0, 0, fb_w, fb_h), components=3), np.uint8)
+        cv2.imwrite(path, cv2.cvtColor(img.reshape(fb_h, fb_w, 3)[::-1], cv2.COLOR_RGB2BGR))
+        print(f"screenshot: {path}")
 
     # --- loop --------------------------------------------------------------------------------
     def run(self) -> int:
@@ -220,6 +297,7 @@ class App:
         last_pose_id = -1
         last_hud = 0.0
         t_start = time.perf_counter()
+        shot_done = False
         while not glfw.window_should_close(self.win):
             glfw.poll_events()
             if self.args.seconds and time.perf_counter() - t_start >= self.args.seconds:
@@ -231,8 +309,10 @@ class App:
                 last_id = frame.id
             if self.pose:
                 last_pose_id = self._update_pose(last_pose_id)
+            if self.demo_anim:
+                self._demo_pose(time.perf_counter() - t_start)
 
-            self._draw_video()
+            self._draw_scene()
             now = time.perf_counter()
             if self.show_hud:
                 if now - last_hud >= HUD_REFRESH_S:
@@ -240,7 +320,12 @@ class App:
                     last_hud = now
                 self._draw_hud()
 
+            if (self.args.screenshot and not shot_done
+                    and time.perf_counter() - t_start >= max(self.args.seconds - 0.2, 0.5)):
+                self._save_screenshot(self.args.screenshot)     # readback único, só para depuração
+                shot_done = True
             glfw.swap_buffers(self.win)
+            finish_without_gil()                            # espera o vsync sem o GIL (gl_sync.py)
             self.render_rate.tick()
             if frame is not None:
                 self.latency.add(time.perf_counter() - frame.t_capture)
@@ -261,6 +346,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--height", type=int, default=720)
     ap.add_argument("--no-mirror", action="store_true", help="não espelha a imagem")
     ap.add_argument("--seconds", type=float, default=0, help="fecha sozinho após N s e imprime as métricas")
+    ap.add_argument("--garment", default=str(paths.TEMPLATES / "tshirt.glb"), help="GLB da peça")
+    ap.add_argument("--hfov", type=float, default=70.0, help="FOV horizontal da webcam em graus")
+    ap.add_argument("--demo", action="store_true", help="começa com a animação de teste do LBS ligada")
+    ap.add_argument("--screenshot", help="salva um PNG da tela perto do fim (use com --seconds)")
     ap.add_argument("--debug", action="store_true", help="liga a pose: esqueleto e métricas de pose/jitter")
     args = ap.parse_args(argv)
     return App(args).run()
