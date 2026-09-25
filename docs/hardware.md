@@ -26,8 +26,12 @@ A VRAM dedicada é de 6 GB. Isso é suficiente para o app, mas apertado para ima
 2. **Python:** o `uv` obteve o 3.11 sem mexer no Python do sistema (máquina corporativa).
 3. **MediaPipe na CPU:** a CPU é de classe alta para notebook. Mantemos o plano; a T13 (`rtmlib` + `onnxruntime-gpu`
    com CUDA) só será adiantada se o benchmark da T3 ficar abaixo de 30 Hz.
-4. **Webcam:** o driver mede ~30 FPS. Se a redução de tremulação do driver adicionar latência, avaliar desligá-la
-   na T2, quando houver métrica de latência.
+4. **Webcam e luz (medido na T11):** a webcam entrega 30 FPS com boa luz, mas com **pouca luz cai para ~15 FPS**:
+   a exposição automática passa de 1/30 s. Medido com o OpenCV (DirectShow): automática = 14,9 FPS; exposição
+   manual ≤ 1/32 s = 30 FPS, porém o quadro fica ~6x mais escuro e o ganho não é ajustável por software nesta
+   câmera. Solução: **mais luz no ambiente** (de frente, não atrás). O HUD avisa quando a câmera fica abaixo de
+   24 FPS, `--camera-settings` abre o diálogo do driver (procure compensação de pouca luz / taxa de quadros
+   dinâmica) e o relatório do benchmark diagnostica se o limite é a webcam ou o processamento.
 5. **T12 com 6 GB de VRAM:** pode exigir versões quantizadas ou rodar em nuvem. Decidir só quando a T12 começar.
 6. **GIL × vsync (descoberto na T5):** com vsync, o driver NVIDIA bloqueia a thread de render dentro das
    chamadas GL, e o ModernGL segura o GIL nessa espera. A inferência da pose ia de 15 para 33 ms. Corrigido com

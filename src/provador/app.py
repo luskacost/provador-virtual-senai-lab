@@ -41,6 +41,8 @@ HUD_WIDTH = 720
 HUD_LINE_H = 26
 HUD_REFRESH_S = 0.25         # o texto muda pouco: reenviar a textura só 4x/s
 MSAA_SAMPLES = 4
+LOW_CAMERA_FPS = 24.0        # abaixo disso o HUD avisa (a webcam cai para ~15 FPS com pouca luz)
+LOW_FPS_GRACE_S = 6.0        # depois do aquecimento
 LIGHT_PERIOD_S = 0.1          # a luz muda devagar: estimar 10x/s basta (e custa ~1 ms)
 # Posição fixa usada só pela animação de teste (tecla A); no uso normal o retarget posiciona a peça.
 STATIC_MODEL = sk.translation((0.0, -1.25, -1.7))
@@ -81,6 +83,7 @@ class App:
         self.light_ms = LatencyStats()
         self.recorder: SessionRecorder | None = None      # definido por tools/benchmark.py
         self.gl_renderer = "?"
+        self.t_loop_start = time.perf_counter()
         self._last_frame = None
         self._last_pose: PoseResult | None = None
         self._last_light_t = 0.0
@@ -329,6 +332,9 @@ class App:
             f"FPS camera  {cam.capture_rate.rate:5.1f}",
             f"Latencia captura->tela  {self.latency.mean_ms:4.0f} ms (max {self.latency.max_ms:.0f})",
         ]
+        fps_cam = cam.capture_rate.rate
+        if 0 < fps_cam < LOW_CAMERA_FPS and time.perf_counter() - self.t_loop_start > LOW_FPS_GRACE_S:
+            lines.append(f"AVISO: webcam a {fps_cam:.0f} FPS. Com pouca luz ela reduz o FPS: acenda mais luz.")
         if self.fit is not None:
             lines.append(f"Ajuste: {self.fit.depth:.2f} m | escala {self.fit.scale[0]:.2f}/{self.fit.scale[1]:.2f}"
                          f" | giro {self.fit.yaw_deg:+.0f} torcao {self.fit.twist_deg:+.0f} | "
@@ -403,7 +409,8 @@ class App:
     # --- loop --------------------------------------------------------------------------------
     def run(self) -> int:
         try:
-            cam = CameraThread(self.args.camera_index, self.args.width, self.args.height).start()
+            cam = CameraThread(self.args.camera_index, self.args.width, self.args.height,
+                               settings_dialog=self.args.camera_settings).start()
         except RuntimeError as exc:
             print(f"[ERRO] {exc}")
             return 1
@@ -435,6 +442,7 @@ class App:
         last_mask_id = -1
         last_hud = 0.0
         t_start = time.perf_counter()
+        self.t_loop_start = t_start
         shot_done = False
         last_swap = None
         last_cycle = t_start
@@ -568,6 +576,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--fixed-light", action="store_true", help="começa com a luz fixa (sem estimar; tecla L alterna)")
     ap.add_argument("--wb-strength", type=float, default=0.35, help="força do balanço de branco pela pele (0 = desliga)")
     ap.add_argument("--grain", type=float, default=0.02, help="grão sobre a peça, combina com o ruído da webcam (0 = sem)")
+    ap.add_argument("--camera-settings", action="store_true",
+                    help="abre o diálogo de propriedades do driver da webcam (desligar compensação de pouca luz)")
     ap.add_argument("--cycle", type=float, default=0, help="troca de peça sozinho a cada N s (teste de desempenho)")
     ap.add_argument("--hfov", type=float, default=70.0, help="FOV horizontal da webcam em graus")
     ap.add_argument("--demo", action="store_true", help="começa com a animação de teste do LBS ligada")

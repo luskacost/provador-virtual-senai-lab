@@ -10,3 +10,6 @@ models/*.onnx
 docs/hardware_raw.txt
 benchmarks/
 exec.txt
+# Fotos de peças reais e GLBs gerados delas: podem conter marcas registradas (decida antes de publicar)
+assets/photos/
+assets/garments/photo_*

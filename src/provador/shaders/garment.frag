@@ -1,7 +1,9 @@
 #version 330
 // Peca: difuso por SH estimado na pele (lighting.py) + brilho especular suave + sheen de tecido + grao.
 // Contas em espaco linear; a saida volta para sRGB. Ver docs/luz.md.
-uniform vec4 base_color;        // sRGB
+uniform vec4 base_color;        // sRGB; com textura, multiplica o albedo
+uniform sampler2D albedo_tex;   // atlas UV frente/costas (sRGB)
+uniform bool has_albedo;
 uniform float sh[9];            // forma da irradiancia (media ~1); direcao dominante = (sh[3], sh[1], sh[2])
 uniform float exposure;
 uniform vec3 tint;              // balanco de branco
@@ -31,7 +33,8 @@ void main() {
     // entao descarta e deixa o video (pescoco, bracos) aparecer. Independe do espelho.
     if (dot(n, to_eye) < 0.0) discard;
 
-    vec3 albedo = pow(base_color.rgb, vec3(2.2));
+    vec3 base = has_albedo ? texture(albedo_tex, v_uv).rgb * base_color.rgb : base_color.rgb;
+    vec3 albedo = pow(base, vec3(2.2));
     float irradiance = max(sh_eval(n), 0.06) * exposure;
     vec3 rgb = albedo * irradiance * 0.85 * tint;
 

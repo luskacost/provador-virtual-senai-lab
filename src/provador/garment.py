@@ -6,6 +6,7 @@ O renderer (T5) faz o mesmo cálculo no vertex shader; esta versão em CPU serve
 from dataclasses import dataclass
 from pathlib import Path
 
+import cv2
 import numpy as np
 from pygltflib import GLTF2
 
@@ -25,6 +26,7 @@ class Garment:
     indices: np.ndarray          # (F*3,) uint32
     base_color: tuple[float, float, float, float]
     name: str = ""
+    texture: np.ndarray | None = None      # (H, W, 3) BGR uint8 embutida no GLB (atlas UV), se houver
 
 
 def _read_accessor(gltf: GLTF2, blob: bytes, index: int) -> np.ndarray:
@@ -40,6 +42,19 @@ def _read_accessor(gltf: GLTF2, blob: bytes, index: int) -> np.ndarray:
         raw = np.frombuffer(blob, np.uint8, acc.count * stride, offset).reshape(acc.count, stride)
         data = raw[:, : dtype.itemsize * n_comp].copy().view(dtype).ravel()
     return data.reshape(acc.count, n_comp) if n_comp > 1 else data.copy()
+
+
+def _read_texture(gltf: GLTF2, blob: bytes, material) -> np.ndarray | None:
+    """Decodifica a baseColorTexture embutida (PNG/JPEG em bufferView). Texturas externas (uri) são ignoradas."""
+    info = material.pbrMetallicRoughness.baseColorTexture if material and material.pbrMetallicRoughness else None
+    if info is None or not gltf.textures:
+        return None
+    image = gltf.images[gltf.textures[info.index].source]
+    if image.bufferView is None:
+        return None
+    view = gltf.bufferViews[image.bufferView]
+    data = blob[(view.byteOffset or 0):(view.byteOffset or 0) + view.byteLength]
+    return cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
 
 
 def load_glb(path: str | Path) -> Garment:
@@ -78,6 +93,7 @@ def load_glb(path: str | Path) -> Garment:
         indices=_read_accessor(gltf, blob, prim.indices).astype(np.uint32),
         base_color=color,
         name=gltf.meshes[0].name or Path(path).stem,
+        texture=_read_texture(gltf, blob, mat),
     )
 
 

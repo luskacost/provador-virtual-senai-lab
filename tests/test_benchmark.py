@@ -119,3 +119,18 @@ def test_sampler_roda_sem_nvml(monkeypatch):
     time.sleep(0.3)
     sampler.stop()
     assert len(rec.system) >= 2 and "gpu_util" not in rec.system[0] and rec.system[0]["rss_mb"] > 0
+
+
+def test_diagnostico_aponta_a_webcam_quando_o_processamento_da_conta():
+    lenta = bm.compute_stats(fake_session(fps=15.0), 3.0)          # pose ~16 ms → comporta ~60 FPS
+    diag = bm.diagnosis(lenta)
+    assert diag and "webcam" in diag and "pouca luz" in diag
+    assert bm.diagnosis(bm.compute_stats(fake_session(fps=30.0), 3.0)) is None
+    assert "Diagnóstico" in bm.build_report(lenta, {})
+
+
+def test_diagnostico_aponta_o_processamento_quando_ele_e_o_gargalo():
+    rec = fake_session(fps=15.0)
+    rec.stages["pose"] = [(100.0 + k / 30.0, 60.0) for k in range(600)]       # pose a 60 ms: só ~16 FPS
+    diag = bm.diagnosis(bm.compute_stats(rec, 3.0))
+    assert diag and "não comporta" in diag

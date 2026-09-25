@@ -27,8 +27,10 @@ class CameraThread:
 
     HISTORY = 8
 
-    def __init__(self, index: int = 0, width: int = 1280, height: int = 720, fps: int = 30):
+    def __init__(self, index: int = 0, width: int = 1280, height: int = 720, fps: int = 30,
+                 settings_dialog: bool = False):
         self.index = index
+        self.settings_dialog = settings_dialog
         self.width, self.height, self.fps = width, height, fps
         self.capture_rate = RateCounter()
         self._cap = None
@@ -55,6 +57,8 @@ class CameraThread:
         cap.set(cv2.CAP_PROP_FPS, self.fps)
         cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        if self.settings_dialog:
+            cap.set(cv2.CAP_PROP_SETTINGS, 1)      # diálogo do driver (DirectShow): compensação de pouca luz etc.
         self._cap = cap
         self._thread = threading.Thread(target=self._run, name="camera", daemon=True)
         self._thread.start()

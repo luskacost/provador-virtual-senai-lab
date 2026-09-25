@@ -35,6 +35,15 @@ class GpuGarment:
     def __init__(self, ctx: moderngl.Context, prog: moderngl.Program, g: Garment):
         self.name = g.name
         self.base_color = g.base_color
+        self.albedo: moderngl.Texture | None = None
+        if g.texture is not None:
+            h, w = g.texture.shape[:2]
+            self.albedo = ctx.texture((w, h), 3, np.ascontiguousarray(g.texture).tobytes())
+            self.albedo.swizzle = "BGR1"                      # o OpenCV entrega BGR
+            self.albedo.build_mipmaps()
+            self.albedo.filter = (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR)
+            self.albedo.anisotropy = 8.0
+            self.albedo.repeat_x = self.albedo.repeat_y = False
         self._bufs = [
             ctx.buffer(g.positions.astype("f4").tobytes()),
             ctx.buffer(g.normals.astype("f4").tobytes()),
@@ -49,6 +58,8 @@ class GpuGarment:
         self.vao = ctx.vertex_array(prog, content, index_buffer=self._ibo, index_element_size=4)
 
     def release(self) -> None:
+        if self.albedo is not None:
+            self.albedo.release()
         self.vao.release()
         for b in (*self._bufs, self._ibo):
             b.release()
@@ -60,6 +71,7 @@ class GarmentRenderer:
         self.hfov = hfov
         self.prog = ctx.program(vertex_shader=vertex_source(), fragment_shader=fragment_source())
         self.prog["mask"].value = 1
+        self.prog["albedo_tex"].value = 2
         self.inflate = INFLATE
         self.grain = GRAIN
         self._frame_no = 0
@@ -69,6 +81,11 @@ class GarmentRenderer:
 
     def load(self, g: Garment) -> GpuGarment:
         return GpuGarment(self.ctx, self.prog, g)
+
+    def _bind_albedo(self, garment: GpuGarment) -> None:
+        self.prog["has_albedo"].value = garment.albedo is not None
+        if garment.albedo is not None:
+            garment.albedo.use(2)
 
     def set_light(self, light: Light) -> None:
         """Luz estimada (lighting.py): SH da forma, exposição e balanço de branco."""
@@ -99,6 +116,7 @@ class GarmentRenderer:
         self.prog["grain"].value = 0.0
         self.set_light(DEFAULT_LIGHT)
         self.prog["base_color"].value = tuple(garment.base_color)
+        self._bind_albedo(garment)
         self.ctx.enable(moderngl.DEPTH_TEST)
         self.ctx.disable(moderngl.CULL_FACE | moderngl.BLEND)
         garment.vao.render(moderngl.TRIANGLES)
@@ -125,6 +143,7 @@ class GarmentRenderer:
         self.prog["proj"].write(gl_bytes(perspective(self.hfov, w / h)))
         self.prog["mirror"].value = mirror
         self.prog["base_color"].value = tuple(self.current.base_color)
+        self._bind_albedo(self.current)
         self.ctx.enable(moderngl.DEPTH_TEST)
         self.ctx.disable(moderngl.CULL_FACE)       # casca aberta: o lado de dentro é tratado no shader
         self.ctx.enable(moderngl.BLEND)            # alfa < 1 onde cabelo/rosto passam por cima

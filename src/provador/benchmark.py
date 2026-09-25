@@ -177,6 +177,21 @@ def verdicts(stats: dict) -> list[dict]:
     ]
 
 
+def diagnosis(stats: dict) -> str | None:
+    """Quando a meta de FPS falha, diz se o limite é a webcam ou o processamento. None se a meta foi atingida."""
+    fps = stats["fps_video"]["mean"]
+    if fps >= GOALS["fps_mean"] - FPS_TOLERANCE:
+        return None
+    slowest = max((stats["stages_ms"].get(k, {}).get("mean", 0.0) for k in ("pose", "segmentacao")), default=0.0)
+    if slowest > 0 and 1000.0 / slowest >= GOALS["fps_mean"]:
+        return (f"**Diagnóstico:** o processamento comporta ~{1000.0 / slowest:.0f} FPS (estágio mais lento: "
+                f"{slowest:.0f} ms), mas vídeo e peça se atualizam a {fps:.1f} FPS. O limite é a **webcam**: com pouca "
+                "luz ela aumenta a exposição e cai para ~15 FPS. Acenda mais luz e rode de novo "
+                "(veja `docs/hardware.md`, ajuste 4).")
+    return ("**Diagnóstico:** o processamento não comporta a meta; o estágio mais lento aparece na tabela "
+            "de orçamento por estágio.")
+
+
 # --- gráficos ----------------------------------------------------------------------------------
 def _style(ax) -> None:
     ax.set_facecolor(SURFACE)
@@ -280,6 +295,9 @@ def build_report(stats: dict, meta: dict, charts: dict[str, str] | None = None, 
     s += ["", (f"**{verdict}** O FPS efetivo é o ritmo em que vídeo e peça se atualizam juntos; é limitado pela "
                f"webcam ({meta.get('camera_fps', 30)} FPS nominais), por isso a média tem tolerância de "
                f"±{FPS_TOLERANCE} FPS (cada janela de 1 s conta quadros inteiros)."), ""]
+    diag = diagnosis(stats)
+    if diag:
+        s += [diag, ""]
     if charts:
         for key, title in (("fps", "FPS efetivo por segundo"), ("latency", "Distribuição da latência")):
             if key in charts:

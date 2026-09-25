@@ -21,13 +21,17 @@ from pygltflib import (
     Attributes,
     Buffer,
     BufferView,
+    Image,
     Material,
     Mesh,
     Node,
     PbrMetallicRoughness,
     Primitive,
+    Sampler,
     Scene,
     Skin,
+    Texture,
+    TextureInfo,
 )
 
 from . import skeleton as sk
@@ -203,8 +207,9 @@ def build_tshirt(sleeve_end: float = SLEEVE_X[1], hem: float = TORSO_RINGS[0][0]
 
 
 def write_glb(mesh: Mesh3D, path: str | Path, name: str = "camiseta_template",
-              color: tuple[float, ...] = BASE_COLOR) -> Path:
-    """Grava o GLB: malha + skin + nós dos ossos (hierarquia do esqueleto padrão)."""
+              color: tuple[float, ...] = BASE_COLOR, texture_png: bytes | None = None) -> Path:
+    """Grava o GLB: malha + skin + nós dos ossos (hierarquia do esqueleto padrão). Com texture_png, embute a
+    textura (atlas UV frente/costas) como baseColorTexture; `color` vira um multiplicador dela."""
     path = Path(path)
     blob = bytearray()
     views, accessors = [], []
@@ -234,6 +239,18 @@ def write_glb(mesh: Mesh3D, path: str | Path, name: str = "camiseta_template",
     a_ibm = add(ibm, FLOAT, "MAT4", 0)
     views[-1].target = None
 
+    pbr = PbrMetallicRoughness(baseColorFactor=list(color), metallicFactor=0.0, roughnessFactor=0.9)
+    images = samplers = textures = None
+    if texture_png:
+        while len(blob) % 4:
+            blob.append(0)
+        views.append(BufferView(buffer=0, byteOffset=len(blob), byteLength=len(texture_png)))
+        blob.extend(texture_png)
+        images = [Image(bufferView=len(views) - 1, mimeType="image/png")]
+        samplers = [Sampler(magFilter=9729, minFilter=9987, wrapS=33071, wrapT=33071)]   # linear, mipmap, clamp
+        textures = [Texture(source=0, sampler=0)]
+        pbr.baseColorTexture = TextureInfo(index=0)
+
     # Nós: 0..n-1 = ossos (mesma ordem do esqueleto), n = malha
     nodes = [Node(name=j.name, translation=sk.REST_LOCAL[i].tolist()) for i, j in enumerate(sk.JOINTS)]
     for i, j in enumerate(sk.JOINTS):
@@ -252,8 +269,8 @@ def write_glb(mesh: Mesh3D, path: str | Path, name: str = "camiseta_template",
             indices=a_idx, material=0)])],
         skins=[Skin(name="esqueleto", joints=list(range(sk.N_JOINTS)), inverseBindMatrices=a_ibm,
                     skeleton=sk.INDEX["hips"])],
-        materials=[Material(name="tecido", doubleSided=True, pbrMetallicRoughness=PbrMetallicRoughness(
-            baseColorFactor=list(color), metallicFactor=0.0, roughnessFactor=0.9))],
+        materials=[Material(name="tecido", doubleSided=True, pbrMetallicRoughness=pbr)],
+        images=images, samplers=samplers, textures=textures,
         accessors=accessors,
         bufferViews=views,
         buffers=[Buffer(byteLength=len(blob))],
