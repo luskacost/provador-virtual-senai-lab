@@ -67,6 +67,33 @@ class GarmentRenderer:
         self.prog["bones"].write(gl_bytes(skin_mats))
         self.prog["model"].write(gl_bytes(model))
 
+    def render_thumbnail(self, garment: GpuGarment, size: int = 192) -> moderngl.Texture:
+        """Miniatura de frente, na pose de repouso, renderizada direto numa textura (sem readback).
+        Deixa o framebuffer da tela ativo ao terminar."""
+        tex = self.ctx.texture((size, size), 4)
+        depth = self.ctx.depth_renderbuffer((size, size))
+        fbo = self.ctx.framebuffer([tex], depth)
+        fbo.use()
+        self.ctx.viewport = (0, 0, size, size)
+        fbo.clear(0.46, 0.50, 0.56, 0.95, depth=1.0)
+        self.set_pose(sk.skin_matrices(sk.world_matrices()), sk.translation((0.0, -1.22, -1.2)))
+        self.prog["proj"].write(gl_bytes(perspective(40.0, 1.0)))
+        self.prog["viewport"].value = (0.0, 0.0, float(size), float(size))
+        self.prog["use_mask"].value = False
+        self.prog["mirror"].value = False
+        self.prog["inflate"].value = 0.0
+        self.prog["base_color"].value = tuple(garment.base_color)
+        self.ctx.enable(moderngl.DEPTH_TEST)
+        self.ctx.disable(moderngl.CULL_FACE | moderngl.BLEND)
+        garment.vao.render(moderngl.TRIANGLES)
+        self.ctx.disable(moderngl.DEPTH_TEST)
+        fbo.release()
+        depth.release()
+        tex.build_mipmaps()
+        tex.filter = (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR)
+        self.ctx.screen.use()
+        return tex
+
     def draw(self, viewport: tuple[int, int, int, int], mirror: bool, use_mask: bool = False) -> None:
         """Desenha a peça atual. O viewport do GL já deve ser a área (letterbox) do vídeo; com use_mask, a
         máscara da segmentação precisa estar ligada na unidade 1."""

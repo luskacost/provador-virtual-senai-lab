@@ -1,7 +1,8 @@
 """App do Provador Virtual 3D: webcam + peça 3D rigada (LBS na GPU) + HUD.
 
-Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug] [--garment x.glb] [--hfov 70]
-Teclas: Esc/Q sai · H HUD · M espelho · G peça · S sincronia vídeo/pose · O oclusão dos braços
+Uso:  python -m provador.app [--camera-index 0] [--no-mirror] [--debug] [--garment pasta_ou.glb] [--hfov 70]
+Peças: ←/→ ou 1–9 ou clique nas miniaturas (assets/garments/*.glb; gere com tools/make_template.py --catalog)
+Teclas: Esc/Q sai · H HUD · U interface das peças · M espelho · G peça · S sincronia vídeo/pose · O oclusão
         A animação de teste do LBS · K esqueleto e V cápsulas dos braços (--debug)
 A peça segue o corpo pela pose (retarget.py). --debug mostra o esqueleto e as métricas de pose/jitter.
 """
@@ -18,8 +19,8 @@ import numpy as np
 from . import paths
 from . import skeleton as sk
 from .capture import CameraThread
+from .catalog import Selector, load_catalog
 from .debug_draw import SkeletonOverlay
-from .garment import load_glb
 from .garment_render import GarmentRenderer
 from .gl_sync import finish_without_gil
 from .metrics import JitterStats, LatencyStats, RateCounter, RunningMean
@@ -27,6 +28,8 @@ from .occlusion import ArmOccluder
 from .pose import L_SHOULDER, R_SHOULDER, PoseResult, PoseWorker
 from .retarget import Retarget, joint_error_px, retarget
 from .segment import SegWorker
+from .ui import hit
+from .ui_draw import GarmentBar
 from .viewport import letterbox
 
 SHADERS = paths.ROOT / "src" / "provador" / "shaders"
@@ -65,6 +68,14 @@ class App:
         self.jitter_filtered = JitterStats()
         self.person_found = False
         self.garments: GarmentRenderer | None = None
+        self.gpu_garments: list = []
+        self.selector = Selector(0)
+        self.bar: GarmentBar | None = None
+        self.show_ui = True
+        self.t_switch: float | None = None
+        self.switch_ms = 0.0
+        self.switch_max = 0.0
+        self.frame_ms = LatencyStats()
         self.show_garment = True
         self.demo_anim = args.demo
         self.sync_video = True
@@ -94,6 +105,7 @@ class App:
         glfw.make_context_current(self.win)
         glfw.swap_interval(1)
         glfw.set_key_callback(self.win, self._on_key)
+        glfw.set_mouse_button_callback(self.win, self._on_click)
 
         self.ctx = moderngl.create_context()
         renderer = self.ctx.info.get("GL_RENDERER", "?")
@@ -118,13 +130,48 @@ class App:
 
     def _init_garment(self) -> None:
         self.garments = GarmentRenderer(self.ctx, hfov=self.args.hfov)
-        path = self.args.garment
-        try:
-            self.garments.current = self.garments.load(load_glb(path))
-        except (OSError, ValueError) as exc:
-            print(f"[AVISO] peça não carregada ({exc}). Gere o template: python tools/make_template.py")
+        loaded, problems = load_catalog(self.args.garment)
+        for msg in problems:
+            print(f"[AVISO] peça ignorada: {msg}")
+        if not loaded:
+            print("[AVISO] nenhuma peça encontrada. Gere o catálogo: python tools/make_template.py --catalog")
             return
-        print(f"Peça: {self.garments.current.name}")
+        t0 = time.perf_counter()
+        self.gpu_garments = [self.garments.load(g) for g in loaded]          # todas pré-carregadas na GPU
+        thumbs = [self.garments.render_thumbnail(g) for g in self.gpu_garments]
+        self.bar = GarmentBar(self.ctx, thumbs, [g.name for g in loaded])
+        self.selector = Selector(len(loaded))
+        self.garments.current = self.gpu_garments[0]
+        print(f"Peças: {len(loaded)} pré-carregadas em {(time.perf_counter() - t0) * 1000:.0f} ms")
+
+    def _apply_selection(self) -> None:
+        self.garments.current = self.gpu_garments[self.selector.index]
+        self.t_switch = time.perf_counter()
+
+    def _select(self, i: int) -> None:
+        if self.gpu_garments and self.selector.select(i):
+            self._apply_selection()
+
+    def _step(self, delta: int) -> None:
+        if self.gpu_garments and self.selector.step(delta):
+            self._apply_selection()
+
+    def _on_click(self, win, button, action, mods) -> None:
+        if button != glfw.MOUSE_BUTTON_LEFT or action != glfw.PRESS or not self.bar or not self.show_ui:
+            return
+        win_w, win_h = glfw.get_window_size(win)
+        fb_w, fb_h = glfw.get_framebuffer_size(win)
+        if win_w == 0 or win_h == 0:
+            return
+        cx, cy = glfw.get_cursor_pos(win)
+        found = hit(self.bar.layout(fb_w, fb_h), cx * fb_w / win_w, cy * fb_h / win_h)   # HiDPI: janela → pixels
+        if found is None:
+            return
+        kind, i = found
+        if kind == "piece":
+            self._select(i)
+        else:
+            self._step(-1 if kind == "prev" else +1)
 
     def _demo_pose(self, t: float) -> None:
         """Anima os ossos (sem pose da webcam) para conferir o LBS na GPU."""
@@ -142,6 +189,16 @@ class App:
             glfw.set_window_should_close(win, True)
         elif key == glfw.KEY_H:
             self.show_hud = not self.show_hud
+        elif key == glfw.KEY_U:
+            self.show_ui = not self.show_ui
+        elif key == glfw.KEY_RIGHT:
+            self._step(+1)
+        elif key == glfw.KEY_LEFT:
+            self._step(-1)
+        elif glfw.KEY_1 <= key <= glfw.KEY_9:
+            self._select(key - glfw.KEY_1)
+        elif glfw.KEY_KP_1 <= key <= glfw.KEY_KP_9:
+            self._select(key - glfw.KEY_KP_1)
         elif key == glfw.KEY_M:
             self.mirror = not self.mirror
         elif key == glfw.KEY_K:
@@ -272,9 +329,10 @@ class App:
                 lines.append(f"Jitter ombros (desvio-padrao px): cru {self.jitter_raw.std_max:.2f}"
                              f" -> filtrado {self.jitter_filtered.std_max:.2f}")
         if self.garments and self.garments.current:
-            lines.append(f"Peca: {self.garments.current.name} | hFOV {self.garments.hfov:.0f} | "
-                         f"G: peca | S: sincronia {'ON' if self.sync_video else 'OFF'} | "
-                         f"A: animacao {'ON' if self.demo_anim else 'OFF'}")
+            lines.append(f"Peca {self.selector.index + 1}/{self.selector.count}: {self.garments.current.name}"
+                         f" | troca->tela {self.switch_ms:.0f} ms | quadro max {self.frame_ms.max_ms:.0f} ms")
+            lines.append(f"<-/->, 1-9, clique | hFOV {self.garments.hfov:.0f} | G: peca | U: interface | "
+                         f"S: sincronia {'ON' if self.sync_video else 'OFF'} | A: anim {'ON' if self.demo_anim else 'OFF'}")
         lines.append(f"Espelho {'ON' if self.mirror else 'OFF'} | H: HUD | M: espelho | K: esqueleto | Esc: sair")
         return lines
 
@@ -342,10 +400,16 @@ class App:
         last_hud = 0.0
         t_start = time.perf_counter()
         shot_done = False
+        last_swap = None
+        last_cycle = t_start
         while not glfw.window_should_close(self.win):
             glfw.poll_events()
             if self.args.seconds and time.perf_counter() - t_start >= self.args.seconds:
                 break
+
+            if self.args.cycle and time.perf_counter() - last_cycle >= self.args.cycle:
+                self._step(+1)                                  # teste automático de troca de peça
+                last_cycle = time.perf_counter()
 
             frame = None
             pose_id, pose_result = self.pose.latest() if self.pose else (-1, None)
@@ -374,6 +438,8 @@ class App:
                     self._upload_hud(render_hud(self._hud_lines(cam)))
                     last_hud = now
                 self._draw_hud()
+            if self.bar and self.show_ui:
+                self.bar.draw(*glfw.get_framebuffer_size(self.win), self.selector.index)
 
             if (self.args.screenshot and not shot_done
                     and time.perf_counter() - t_start >= max(self.args.seconds - 0.2, 0.5)):
@@ -382,11 +448,22 @@ class App:
             glfw.swap_buffers(self.win)
             finish_without_gil()                            # espera o vsync sem o GIL (gl_sync.py)
             self.render_rate.tick()
+            t_now = time.perf_counter()
+            if last_swap is not None:
+                self.frame_ms.add(t_now - last_swap)
+            last_swap = t_now
+            if self.t_switch is not None:
+                self.switch_ms = (t_now - self.t_switch) * 1000.0         # da tecla/clique até o frame na tela
+                self.switch_max = max(self.switch_max, self.switch_ms)
+                self.t_switch = None
             if frame is not None:
                 self.latency.add(time.perf_counter() - frame.t_capture)
         if self.args.seconds:
             print(f"FPS render {self.render_rate.rate:.1f} | FPS camera {cam.capture_rate.rate:.1f} | "
                   f"latencia {self.latency.mean_ms:.0f} ms (max {self.latency.max_ms:.0f})")
+            if self.gpu_garments:
+                print(f"Pecas {self.selector.count} | troca->tela max {self.switch_max:.0f} ms | "
+                      f"quadro (media {self.frame_ms.mean_ms:.1f} / max {self.frame_ms.max_ms:.0f} ms)")
             if self.fit is not None:
                 print(f"Ajuste {self.fit.depth:.2f} m | escala {self.fit.scale[0]:.2f}/{self.fit.scale[1]:.2f} | "
                       f"giro {self.fit.yaw_deg:+.0f} | torcao {self.fit.twist_deg:+.0f} | "
@@ -408,7 +485,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--height", type=int, default=720)
     ap.add_argument("--no-mirror", action="store_true", help="não espelha a imagem")
     ap.add_argument("--seconds", type=float, default=0, help="fecha sozinho após N s e imprime as métricas")
-    ap.add_argument("--garment", default=str(paths.TEMPLATES / "tshirt.glb"), help="GLB da peça")
+    ap.add_argument("--garment", default=None, help="pasta de GLBs ou um GLB (padrão: assets/garments/)")
+    ap.add_argument("--cycle", type=float, default=0, help="troca de peça sozinho a cada N s (teste de desempenho)")
     ap.add_argument("--hfov", type=float, default=70.0, help="FOV horizontal da webcam em graus")
     ap.add_argument("--demo", action="store_true", help="começa com a animação de teste do LBS ligada")
     ap.add_argument("--screenshot", help="salva um PNG da tela perto do fim (use com --seconds)")

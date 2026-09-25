@@ -81,8 +81,9 @@ def _grid(points: np.ndarray, centers: np.ndarray, base: int) -> tuple[np.ndarra
     return flat, tris
 
 
-def _torso_points(front: bool) -> tuple[np.ndarray, np.ndarray]:
+def _torso_points(front: bool, hem: float) -> tuple[np.ndarray, np.ndarray]:
     ys = np.array([r[0] for r in TORSO_RINGS])
+    ys[0] = hem
     a = np.array([r[1] for r in TORSO_RINGS])[:, None]
     b = np.array([r[2] for r in TORSO_RINGS])[:, None]
     phi = np.radians(np.linspace(-90, 90, SEG_TORSO + 1) + (0 if front else 180))
@@ -91,8 +92,8 @@ def _torso_points(front: bool) -> tuple[np.ndarray, np.ndarray]:
     return pts, centers
 
 
-def _sleeve_points(side: float, front: bool) -> tuple[np.ndarray, np.ndarray]:
-    xs = np.linspace(*SLEEVE_X, RINGS_SLEEVE) * side
+def _sleeve_points(side: float, front: bool, sleeve_end: float) -> tuple[np.ndarray, np.ndarray]:
+    xs = np.linspace(SLEEVE_X[0], sleeve_end, RINGS_SLEEVE) * side
     r = np.linspace(*SLEEVE_RADIUS, RINGS_SLEEVE)[:, None]
     theta = np.radians(np.linspace(-90, 90, SEG_SLEEVE + 1) + (0 if front else 180))
     pts = np.stack([
@@ -162,12 +163,13 @@ def _welded_normals(pos: np.ndarray, tris: np.ndarray) -> np.ndarray:
     return n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
 
 
-def build_tshirt() -> Mesh3D:
-    """Camiseta (torso + mangas curtas) na pose de repouso em T."""
+def build_tshirt(sleeve_end: float = SLEEVE_X[1], hem: float = TORSO_RINGS[0][0]) -> Mesh3D:
+    """Camiseta (torso + mangas curtas) na pose de repouso em T. sleeve_end: x da barra da manga (m);
+    hem: y do barrado (m)."""
     positions, tris_all = [], []
     base = 0
-    parts = [(_torso_points(f), f, False) for f in (True, False)]
-    parts += [(_sleeve_points(s, f), f, True) for s in (+1.0, -1.0) for f in (True, False)]
+    parts = [(_torso_points(f, hem), f, False) for f in (True, False)]
+    parts += [(_sleeve_points(s, f, sleeve_end), f, True) for s in (+1.0, -1.0) for f in (True, False)]
     for (pts, ctr), _front, _sleeve in parts:
         flat, tris = _grid(pts, ctr, base)
         positions.append(flat)
@@ -260,3 +262,23 @@ def write_glb(mesh: Mesh3D, path: str | Path, name: str = "camiseta_template",
     path.parent.mkdir(parents=True, exist_ok=True)
     gltf.save_binary(str(path))
     return path
+
+
+# Catálogo procedural de demonstração: (arquivo, nome, cor RGBA, fim da manga, barrado). Nomes em ASCII (o HUD
+# usa a fonte do OpenCV, sem acentos). O prefixo numérico define a ordem no app.
+DEMO_CATALOG = [
+    ("01_branca.glb", "Camiseta Branca", (0.93, 0.93, 0.95, 1.0), 0.33, 0.95),
+    ("02_azul.glb", "Camiseta Azul Marinho", (0.12, 0.20, 0.42, 1.0), 0.33, 0.95),
+    ("03_vermelha.glb", "Camiseta Vermelha Longa", (0.75, 0.13, 0.15, 1.0), 0.36, 0.88),
+    ("04_verde.glb", "Camiseta Verde Curta", (0.20, 0.55, 0.32, 1.0), 0.26, 1.02),
+    ("05_preta.glb", "Camiseta Preta", (0.10, 0.10, 0.12, 1.0), 0.31, 0.93),
+]
+
+
+def write_demo_catalog(folder: str | Path) -> list[Path]:
+    """Gera as peças de demonstração em `folder` (sobrescreve as de mesmo nome)."""
+    out = []
+    for filename, name, color, sleeve_end, hem in DEMO_CATALOG:
+        mesh = build_tshirt(sleeve_end=sleeve_end, hem=hem)
+        out.append(write_glb(mesh, Path(folder) / filename, name=name, color=color))
+    return out

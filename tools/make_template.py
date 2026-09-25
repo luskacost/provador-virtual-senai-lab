@@ -7,7 +7,7 @@ Uso:  python tools/make_template.py [--out caminho.glb] [--preview preview.png]
 import argparse
 
 from provador import paths
-from provador.template import build_tshirt, write_glb
+from provador.template import build_tshirt, write_demo_catalog, write_glb
 
 
 def preview(glb, png) -> None:
@@ -42,8 +42,12 @@ def preview(glb, png) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=str(paths.TEMPLATES / "tshirt.glb"))
+    ap.add_argument("--catalog", action="store_true", help="gera também as 5 peças de demonstração em assets/garments/")
     ap.add_argument("--preview", help="salva um PNG de conferência (requer matplotlib)")
     args = ap.parse_args()
+    if args.catalog:
+        for path in write_demo_catalog(paths.GARMENTS):
+            print(path)
     mesh = build_tshirt()
     out = write_glb(mesh, args.out)
     print(f"{out} | {len(mesh.positions)} vertices, {len(mesh.indices) // 3} triangulos")
