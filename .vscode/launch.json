@@ -1,0 +1,8 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "Check do ambiente", "type": "debugpy", "request": "launch", "module": "provador.check", "args": ["--camera"], "cwd": "${workspaceFolder}", "console": "integratedTerminal" },
+    { "name": "Provador (app)", "type": "debugpy", "request": "launch", "module": "provador.app", "cwd": "${workspaceFolder}", "console": "integratedTerminal" },
+    { "name": "Provador (debug: esqueleto)", "type": "debugpy", "request": "launch", "module": "provador.app", "args": ["--debug"], "cwd": "${workspaceFolder}", "console": "integratedTerminal" }
+  ]
+}

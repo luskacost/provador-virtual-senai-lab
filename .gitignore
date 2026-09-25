@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+models/*.task
+models/*.tflite
+docs/hardware_raw.txt
+benchmarks/

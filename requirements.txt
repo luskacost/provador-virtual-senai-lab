@@ -1,0 +1,10 @@
+# Provador Virtual 3D - dependencias de runtime (Python 3.11 ou 3.12; MediaPipe nao suporta 3.13+)
+mediapipe>=0.10.14
+opencv-python>=4.9
+moderngl>=5.10
+glfw>=2.7
+pygltflib>=1.16
+trimesh>=4.0
+numpy>=1.26
+psutil>=5.9
+nvidia-ml-py>=12.0   # modulo "pynvml"; em GPU nao-NVIDIA apenas nao reporta a GPU
