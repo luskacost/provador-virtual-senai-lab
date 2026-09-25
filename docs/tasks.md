@@ -52,6 +52,8 @@ Status: ✅ feito · 🔄 em andamento · ⬜ a fazer
 | T12 | P2 | ⬜ | `tools/blender_rig.py` + imagem→3D (TRELLIS ou Hunyuan3D) | Jaqueta gerada por IA, rigada, funcionando no app |
 | T13 | P2 | ⬜ | Plano B de desempenho: rtmlib RTMW no onnxruntime-gpu (DirectML em AMD) | `--pose-backend rtmw` + benchmark comparativo |
 | T14 | P2 | ⬜ | Navegação por gesto (pinça, MediaPipe Hands) | Sem falsos positivos em 1 min |
+| T15 | P1 | ⬜ | Passada de realismo clássica: casar a peça com a câmera (desfoque, ruído, cor), molde com gola e manga afunilada, largura pelo tronco medido, normal map de tecido | A peça deixa de parecer "colada" ao lado do vídeo |
+| T16 | P2 | ⬜ | IA generativa para o realismo (super-resolução das fotos, normal map, foto HD, refinamento neural) — ver [`roadmap_realismo.md`](roadmap_realismo.md) | Depois de 27/10/2026 |
 | v2 | — | ⬜ | Forma do corpo por calibração SMPL, HyperBones, foto HD por CatVTON | — |
 
 ## Verificação
