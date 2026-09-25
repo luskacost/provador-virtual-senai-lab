@@ -1,0 +1,92 @@
+"""Captura da webcam em thread própria: o consumidor sempre recebe o frame mais recente."""
+
+import sys
+import threading
+import time
+from dataclasses import dataclass
+from typing import Self
+
+import numpy as np
+
+from .metrics import RateCounter
+
+
+@dataclass(frozen=True)
+class Frame:
+    """Frame BGR (H, W, 3, uint8) e o instante (perf_counter) em que o driver o entregou."""
+
+    id: int
+    image: np.ndarray
+    t_capture: float
+
+
+class CameraThread:
+    """Lê a webcam num loop dedicado e guarda apenas o frame mais recente (sem fila, sem atraso acumulado)."""
+
+    def __init__(self, index: int = 0, width: int = 1280, height: int = 720, fps: int = 30):
+        self.index = index
+        self.width, self.height, self.fps = width, height, fps
+        self.capture_rate = RateCounter()
+        self._cap = None
+        self._thread: threading.Thread | None = None
+        self._stop = threading.Event()
+        self._lock = threading.Lock()
+        self._frame: Frame | None = None
+        self._next_id = 0
+        self.error: str | None = None
+
+    def start(self) -> Self:
+        """Abre a câmera (falha cedo, com mensagem clara) e inicia a thread de leitura."""
+        import cv2
+
+        backend = cv2.CAP_DSHOW if sys.platform == "win32" else cv2.CAP_ANY
+        cap = cv2.VideoCapture(self.index, backend)
+        if not cap.isOpened():
+            raise RuntimeError(f"Webcam {self.index} não abriu (em uso por outro app ou índice errado?)")
+        # A ORDEM IMPORTA no DirectShow: com o FOURCC antes da resolução a câmera cai num formato
+        # não comprimido e entrega ~10 FPS em 720p. Resolução → FPS → MJPG dá ~30 FPS.
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        cap.set(cv2.CAP_PROP_FPS, self.fps)
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self._cap = cap
+        self._thread = threading.Thread(target=self._run, name="camera", daemon=True)
+        self._thread.start()
+        return self
+
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            ok, image = self._cap.read()
+            if not ok:
+                self.error = "a webcam parou de entregar frames"
+                time.sleep(0.05)
+                continue
+            self.error = None
+            t = time.perf_counter()
+            with self._lock:
+                self._frame = Frame(self._next_id, image, t)
+                self._next_id += 1
+            self.capture_rate.tick()
+
+    def latest(self, after_id: int = -1) -> Frame | None:
+        """Frame mais recente, ou None se ainda não há um com id > after_id."""
+        with self._lock:
+            frame = self._frame
+        if frame is None or frame.id <= after_id:
+            return None
+        return frame
+
+    def stop(self) -> None:
+        self._stop.set()
+        if self._thread:
+            self._thread.join(timeout=2.0)
+        if self._cap is not None:
+            self._cap.release()
+            self._cap = None
+
+    def __enter__(self) -> Self:
+        return self.start()
+
+    def __exit__(self, *exc) -> None:
+        self.stop()

@@ -19,9 +19,10 @@ A VRAM dedicada é de 6 GB. Isso é suficiente para o app, mas apertado para ima
 
 ## Ajustes ao plano
 
-1. **Notebook híbrido (Intel + NVIDIA):** o OpenGL do `.venv` abre na Intel UHD. Defina o `python.exe` do `.venv`
-   como "Alto desempenho" em *Configurações → Sistema → Tela → Gráficos* (ou no Painel de Controle NVIDIA) e rode
-   `python -m provador.check` de novo até o `GL_RENDERER` mostrar a NVIDIA. Sem isso, render e MSAA ficam lentos.
+1. **Notebook híbrido (Intel + NVIDIA) — resolvido:** o OpenGL abria na Intel UHD. Foi forçada a NVIDIA por chave de
+   registro (`HKCU\Software\Microsoft\DirectX\UserGpuPreferences`, valor `GpuPreference=2;`) para o `python.exe` do
+   `.venv` **e** para o `python.exe`/`pythonw.exe` base do uv, porque o do venv é só um atalho que executa o base.
+   Se recriar o venv ou o Python do uv mudar de versão, repita (ou use *Configurações → Sistema → Tela → Gráficos*).
 2. **Python:** o `uv` obteve o 3.11 sem mexer no Python do sistema (máquina corporativa).
 3. **MediaPipe na CPU:** a CPU é de classe alta para notebook. Mantemos o plano; a T13 (`rtmlib` + `onnxruntime-gpu`
    com CUDA) só será adiantada se o benchmark da T3 ficar abaixo de 30 Hz.

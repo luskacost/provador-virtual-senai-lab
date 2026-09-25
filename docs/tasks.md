@@ -37,8 +37,8 @@ Status: ✅ feito · 🔄 em andamento · ⬜ a fazer
 | # | Prio | Status | Task | Pronto quando |
 |---|---|---|---|---|
 | T0 | P0 | ✅ | Salvar `docs/relatorio_stack.md`, `relatorio_ia.md` e `tasks.md` | Os arquivos existem com o conteúdo do plano |
-| T1 | P0 | 🔄 | Ambiente: venv Python 3.11 + mediapipe, opencv-python, moderngl, glfw, pygltflib, trimesh, numpy, psutil, pynvml | `python -m provador.check` mostra versões e a placa usada pelo OpenGL |
-| T2 | P0 | ⬜ | Captura em thread própria + janela GLFW com a webcam + HUD de FPS | Vídeo 720p com ≥30 FPS |
+| T1 | P0 | ✅ | Ambiente: venv Python 3.11 + mediapipe, opencv-python, moderngl, glfw, pygltflib, trimesh, numpy, psutil, pynvml | `python -m provador.check` mostra versões e a placa usada pelo OpenGL |
+| T2 | P0 | 🔄 | Captura em thread própria + janela GLFW com a webcam + HUD de FPS | Vídeo 720p com ≥30 FPS |
 | T3 | P0 | ⬜ | Pose (VIDEO, full) + One Euro, esqueleto no modo debug | Landmarks ≥30 Hz; parado, desvio-padrão dos ombros <2 px |
 | T4 | P0 | ⬜ | `tools/make_template.py`: camiseta procedural rigada no esqueleto padrão | GLB carrega e deforma ao girar os ossos |
 | T5 | P0 | ⬜ | Renderer: GLB, LBS no vertex shader, projeção alinhada à webcam | Peça estática sobre o vídeo, MSAA, sem readback para a CPU |
