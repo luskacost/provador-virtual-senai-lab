@@ -26,13 +26,17 @@ seção 4.3). Alternativas descartadas: *Standalone* e *Full-Featured* exigem `O
 gerar prompt por IA (não precisamos disso — nosso catálogo já tem prompt escrito à mão); *E-commerce* é um modal
 sobre página de produto, não uma tela de quiosque; *Digital Mirror* exige um segundo aparelho (celular via QR).
 
-## Conflito encontrado: MediaPipe carrega de CDNs externas
+## Conflito encontrado e resolvido: MediaPipe carregava de CDNs externas
 
-`usePersonDetection.ts` baixa o WASM e o modelo do MediaPipe Pose de `cdn.jsdelivr.net` e
+`usePersonDetection.ts` baixava o WASM e o modelo do MediaPipe Pose de `cdn.jsdelivr.net` e
 `storage.googleapis.com` — a seção 4.4 do CLAUDE.md pede "nada de dependência de recursos externos além da
-Decart". **Ainda não resolvido** — decidir com o usuário se self-hosting desses dois arquivos (baixá-los para
-`public/mediapipe/`) entra na Fase 1 ou se aceitamos a dependência (a Decart já é uma dependência externa
-obrigatória; jsdelivr/Google Storage são infraestrutura muito estável, mas é rede a mais no dia do evento).
+Decart". **Resolvido em 28/09/2026** (`web/scripts/setup-mediapipe.mjs`, hook `postinstall`):
+- O WASM já vem dentro do pacote `@mediapipe/tasks-vision` (node_modules) — só copiar, sem rede.
+- O modelo `pose_landmarker_lite.task` (~5,8 MB) é baixado do Google Storage **uma vez**, na configuração
+  (`npm install`), não em cada carregamento de página.
+- Os dois ficam em `web/public/mediapipe/` (~28 MB, fora do git — mesmo padrão do `models/*.task` do plano
+  Python anterior).
+- Depois disso, em tempo de execução, o único serviço externo do quiosque é a própria Decart.
 
 ## Segurança: Next.js do exemplo tinha uma CVE crítica
 
