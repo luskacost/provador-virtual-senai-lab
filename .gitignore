@@ -13,3 +13,10 @@ exec.txt
 # Fotos de peças reais e GLBs gerados delas: podem conter marcas registradas (decida antes de publicar)
 assets/photos/
 assets/garments/photo_*
+
+# --- web/ (Next.js, Decart VTON) ---
+web/node_modules/
+web/.next/
+web/.env.local
+web/.env*.local
+data/
