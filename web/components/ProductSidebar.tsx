@@ -43,7 +43,9 @@ export function ProductSidebar({
               </div>
               <div className="p-2 bg-gray-900">
                 <p className="text-sm font-medium truncate">{product.name}</p>
-                <p className="text-xs text-gray-400">${product.price}</p>
+                {product.price != null && (
+                  <p className="text-xs text-gray-400">${product.price}</p>
+                )}
               </div>
             </button>
           ))}

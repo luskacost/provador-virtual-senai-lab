@@ -2,10 +2,20 @@ export interface Product {
   name: string;
   image: string;
   prompt: string;
-  price: number;
+  // Opcional: as peças reais do laboratório não têm preço (não são de venda).
+  price?: number;
 }
 
 export const PRODUCTS: Product[] = [
+  {
+    // Primeiro teste com peça real (CLAUDE.md, Fase 2). Frente extraída de assets/photos/sesi/folha.jpg,
+    // fundo trocado por branco (a Decart recomenda fundo limpo). Falta ainda id/categoria/ativo do
+    // catálogo final em JSON.
+    name: "Camiseta SESI",
+    image: "/products/sesi-camiseta-branca.jpg",
+    prompt:
+      "Substitute the current top with a white athletic t-shirt featuring a navy blue 'SESI' logo on the chest, blue sleeve cuff text, and a colorful geometric pattern near the hem",
+  },
   {
     name: "Decart Beanie",
     image: "/products/decart-beanie.png",

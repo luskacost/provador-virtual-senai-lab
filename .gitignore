@@ -19,4 +19,5 @@ web/node_modules/
 web/.next/
 web/.env.local
 web/.env*.local
+web/*.tsbuildinfo
 data/
