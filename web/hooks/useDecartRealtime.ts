@@ -54,6 +54,34 @@ export function useDecartRealtime() {
         setStatus("error");
       });
 
+      // DIAGNÓSTICO TEMPORÁRIO (investigando o congelamento do vídeo — remover depois de achar a causa).
+      // rtClient.on("stats", ...) dispara ~1x/s com getStats() do WebRTC já em curso: não custa nem uma
+      // chamada de rede extra, só lê o que o navegador já sabe sobre a conexão.
+      rtClient.on("diagnostic", (evt) => {
+        console.log("[decart:diagnostic]", evt.name, evt.data);
+      });
+      rtClient.on("stats", (s) => {
+        const pair = s.connection.selectedCandidatePairs[0];
+        console.log("[decart:stats]", {
+          rtt_ms: s.connection.currentRoundTripTime != null ? Math.round(s.connection.currentRoundTripTime * 1000) : null,
+          candidatoLocal: pair?.local.candidateType,
+          candidatoRemoto: pair?.remote.candidateType,
+          protocolo: pair?.local.protocol,
+          video_fps: s.video?.framesPerSecond,
+          video_bitrate_kbps: s.video ? Math.round(s.video.bitrate / 1000) : null,
+          video_pacotesPerdidos: s.video?.packetsLost,
+          video_congelamentos: s.video?.freezeCount,
+          video_duracaoCongelado_s: s.video?.totalFreezesDuration,
+          saida_limitadaPor: s.outboundVideo?.qualityLimitationReason,
+        });
+      });
+      rtClient.on("generationEnded", (e) => {
+        console.log("[decart:generationEnded]", e);
+      });
+      rtClient.on("queuePosition", (q) => {
+        console.log("[decart:queuePosition]", q);
+      });
+
       clientRef.current = rtClient;
       return rtClient;
     } catch (err) {
