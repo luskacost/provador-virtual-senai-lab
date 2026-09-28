@@ -49,9 +49,22 @@ confirmar com o usuário.
 `ativo`. Vamos estender o schema na Fase 2, ao trocar os produtos de demonstração da Decart pelas peças reais do
 laboratório.
 
+## Chave de API real (28/09/2026)
+
+O usuário forneceu a `DECART_API_KEY` real. Ela só existe em `web/.env.local` (fora do git; confirmado com
+`git check-ignore`). Testei **apenas** a criação de token (`POST /api/tokens`, que chama `client.tokens.create()`
+no servidor) — não abri uma sessão de vídeo em tempo real, que é a parte cobrada por segundo de geração ativa.
+Resultado: **200 OK**, token JWT válido, `expiresAt` de fato ~10 minutos no futuro (confirma o TTL da doc), e o
+payload do token mostra `dataRetention: false` — bate com o aviso de LGPD da seção 4.6 ("não é armazenado pelo
+estande" — e, por este campo, também não pela Decart nesta conta).
+
+**Ainda não testado:** uma conexão WebRTC real (câmera → Decart → vídeo de volta). Isso é a parte que custa
+dinheiro e precisa de uma pessoa de verdade na frente da câmera; fica para o teste do usuário no navegador.
+
 ## Pendente (preenchendo conforme formos testando)
 
-- Custos reais medidos: **ainda não** — falta a chave de API real.
+- Custos reais medidos: **ainda não** — falta medir uma sessão real de geração (a criação de token, testada, não
+  deve contar como geração ativa).
 - Peças que funcionam bem/mal no modelo: **ainda não testado**.
 - Teste de fundo (seção 4.7, caminhos B e A): **não iniciado**.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
