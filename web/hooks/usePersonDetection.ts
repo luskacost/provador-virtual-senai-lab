@@ -20,15 +20,14 @@ export function usePersonDetection(
     let cancelled = false;
 
     async function init() {
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-      );
+      // Auto-hospedado (CLAUDE.md 4.4: nada externo além da Decart em tempo de execução). Os arquivos vêm
+      // de public/mediapipe/, gerados por "npm install" (scripts/setup-mediapipe.mjs) e fora do git.
+      const vision = await FilesetResolver.forVisionTasks("/mediapipe/wasm");
       if (cancelled) return;
 
       const landmarker = await PoseLandmarker.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+          modelAssetPath: "/mediapipe/pose_landmarker_lite.task",
           delegate: "GPU",
         },
         runningMode: "VIDEO",

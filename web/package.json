@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "postinstall": "node scripts/setup-mediapipe.mjs",
+    "setup:mediapipe": "node scripts/setup-mediapipe.mjs"
   },
   "dependencies": {
     "@decartai/sdk": "latest",

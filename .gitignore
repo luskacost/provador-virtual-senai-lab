@@ -20,4 +20,6 @@ web/.next/
 web/.env.local
 web/.env*.local
 web/*.tsbuildinfo
+# Auto-hospedado do MediaPipe (scripts/setup-mediapipe.mjs baixa/copia no "npm install"; ~28 MB, nao versiona)
+web/public/mediapipe/
 data/
