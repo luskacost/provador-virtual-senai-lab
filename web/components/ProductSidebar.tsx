@@ -13,8 +13,17 @@ export function ProductSidebar({
   onSelectProduct,
 }: ProductSidebarProps) {
   return (
-    <aside className="w-[26rem] shrink-0 border-r border-gray-800 bg-gray-900 flex flex-col">
+    <aside className="w-[26rem] shrink-0 border-r border-gray-800 bg-brand-navy-dark flex flex-col">
       <div className="p-6 border-b border-gray-800">
+        <div className="mb-4 inline-block rounded-lg bg-white px-3 py-2">
+          <Image
+            src="/brand/senai-lab-fashion.png"
+            alt="SENAI Lab Fashion"
+            width={430}
+            height={124}
+            className="h-auto w-[170px]"
+          />
+        </div>
         <h2 className="font-semibold text-2xl">Peças</h2>
         <p className="text-lg text-gray-400 mt-1">
           Toque numa peça para experimentar
@@ -28,7 +37,7 @@ export function ProductSidebar({
               onClick={() => onSelectProduct(product)}
               className={`text-left rounded-xl overflow-hidden border-4 transition-all ${
                 activeProduct?.id === product.id
-                  ? "border-blue-500 ring-4 ring-blue-500/30"
+                  ? "border-brand-orange ring-4 ring-brand-orange/30"
                   : "border-gray-700 hover:border-gray-500"
               }`}
             >

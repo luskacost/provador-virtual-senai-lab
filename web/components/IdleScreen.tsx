@@ -1,12 +1,16 @@
 "use client";
 
+import Image from "next/image";
+
 // Tela inicial de espera (CLAUDE.md 4.2: "Toque para experimentar" quando ninguém está usando) + aviso de
 // LGPD (4.6). O texto do convite reflete o mecanismo real deste app (conecta por presença, não por toque —
 // ver hooks/usePersonDetection.ts); ajuste se o quiosque ganhar um botão físico/touch de início.
 //
-// TEXTO PROVISÓRIO: nome do projeto, cores e a redação do aviso de LGPD ainda não foram validados pelo
-// usuário (CLAUDE.md pede validação explícita da redação). Trocar quando a identidade visual do laboratório
-// chegar.
+// O logo (web/public/brand/senai-lab-fashion.png) tem a palavra "FASHION" em preto — some num fundo escuro
+// — por isso fica numa placa branca, prática comum para logos com texto escuro sobre UI dark.
+//
+// TEXTO AINDA PROVISÓRIO: a redação exata do aviso de LGPD não foi validada pelo usuário (CLAUDE.md pede
+// validação explícita).
 interface IdleScreenProps {
   visible: boolean;
   /** true logo depois de um encerramento forçado (limite de tempo, inatividade, operador) — troca o
@@ -22,16 +26,29 @@ export function IdleScreen({ visible, cooling = false }: IdleScreenProps) {
         visible ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
     >
+      <div className="rounded-2xl bg-white px-8 py-5 shadow-lg">
+        <Image
+          src="/brand/senai-lab-fashion.png"
+          alt="SENAI Lab Fashion"
+          width={430}
+          height={124}
+          className="h-auto w-[280px] sm:w-[380px]"
+          priority
+        />
+      </div>
+
       {cooling ? (
         <>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Sessão encerrada</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-brand-orange sm:text-5xl">
+            Sessão encerrada
+          </h1>
           <p className="max-w-2xl text-xl text-white/90 sm:text-2xl">
             Preparando para a próxima pessoa...
           </p>
         </>
       ) : (
         <>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Provador Virtual</h1>
+          <p className="text-2xl font-semibold text-brand-orange sm:text-3xl">Provador Virtual</p>
           <p className="max-w-2xl text-xl text-white/90 sm:text-2xl">
             Fique em frente à câmera para começar a experimentar as peças
           </p>

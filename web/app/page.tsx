@@ -12,9 +12,9 @@ import { PersonDetectionView } from "@/components/PersonDetectionView";
 
 // CLAUDE.md 4.3 - configurável. 90s é o padrão pedido; os outros dois números não têm um padrão fixado
 // no documento, escolhidos para o ritmo de uma exposição (ajustar aqui se ficar curto/longo demais).
-const SESSION_LIMIT_SECONDS = 90;
-const INACTIVITY_LIMIT_SECONDS = 45;
-const COOLDOWN_SECONDS = 5;
+const SESSION_LIMIT_SECONDS = 30;
+const INACTIVITY_LIMIT_SECONDS = 15;
+const COOLDOWN_SECONDS = 10;
 
 export default function PersonDetectionPage() {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);

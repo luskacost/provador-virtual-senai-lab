@@ -2,6 +2,13 @@
 
 @theme inline {
   --font-sans: system-ui, -apple-system, sans-serif;
+
+  /* Identidade visual do SENAI Lab Fashion: cores extraídas do arquivo real do logo
+     (web/public/brand/senai-lab-fashion.png), não estimadas visualmente. */
+  --color-brand-navy: #164092;
+  --color-brand-orange: #ff6123;
+  /* Navy bem escurecido (~15% da luminância), para fundos: mantém a marca presente sem perder contraste. */
+  --color-brand-navy-dark: #030a16;
 }
 
 button {

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-// Provisório: nome do projeto, sem identidade visual do laboratório ainda (logo/cores virão do usuário).
 export const metadata: Metadata = {
-  title: "Provador Virtual",
+  title: "SENAI Lab Fashion",
   description: "Experimente peças do laboratório ao vivo, na frente da câmera.",
 };
 
