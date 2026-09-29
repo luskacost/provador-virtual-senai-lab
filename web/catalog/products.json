@@ -6,5 +6,13 @@
     "imagem": "/catalog/sesi-camiseta-branca.jpg",
     "prompt": "Substitute the current top with a white athletic t-shirt featuring a navy blue 'SESI' logo on the chest, blue sleeve cuff text, and a colorful geometric pattern near the hem",
     "ativo": true
+  },
+  {
+    "id": "colete-alta-visibilidade",
+    "nome": "Colete de Alta Visibilidade",
+    "categoria": "epi-corpo",
+    "imagem": "/catalog/colete-alta-visibilidade.jpg",
+    "prompt": "Substitute the current top with an orange high-visibility mesh safety vest featuring grey reflective stripes, black trim, a front zipper, and multiple utility pockets",
+    "ativo": true
   }
 ]
