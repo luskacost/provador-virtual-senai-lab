@@ -47,11 +47,11 @@ server testados depois da correção, sem problemas. Sobrou 1 vulnerabilidade al
 próprio Next — corrigi-la pediria salto para o Next 16 (major, risco de quebrar o exemplo); não fiz isso sem
 confirmar com o usuário.
 
-## Catálogo do exemplo: schema mais simples que o do plano
+## Catálogo do exemplo: schema mais simples que o do plano — resolvido na Fase 2
 
-`lib/products.ts` do exemplo usa `{ name, image, prompt, price }`. O CLAUDE.md pede também `id`, `categoria`,
-`ativo`. Vamos estender o schema na Fase 2, ao trocar os produtos de demonstração da Decart pelas peças reais do
-laboratório.
+`lib/products.ts` do exemplo usava `{ name, image, prompt, price }`. Trocado por `catalog/products.json` +
+`lib/catalog.ts`, no schema exato do CLAUDE.md (`id`, `nome`, `categoria`, `imagem`, `prompt`, `ativo`). Os 10
+produtos de demonstração da Decart (com a marca deles) foram removidos; só a Camiseta SESI real ficou.
 
 ## Chave de API real (28/09/2026)
 
@@ -62,13 +62,34 @@ Resultado: **200 OK**, token JWT válido, `expiresAt` de fato ~10 minutos no fut
 payload do token mostra `dataRetention: false` — bate com o aviso de LGPD da seção 4.6 ("não é armazenado pelo
 estande" — e, por este campo, também não pela Decart nesta conta).
 
-**Ainda não testado:** uma conexão WebRTC real (câmera → Decart → vídeo de volta). Isso é a parte que custa
-dinheiro e precisa de uma pessoa de verdade na frente da câmera; fica para o teste do usuário no navegador.
+**Testado pelo usuário em 28/09/2026:** conexão WebRTC real, câmera → Decart → vídeo de volta, com a Camiseta
+SESI (primeira peça real). Resultado: funcionou. Na primeira tentativa a imagem "ficou Live mas travou" — para
+investigar, liguei os eventos de diagnóstico do próprio SDK (`rtClient.on("stats"/"diagnostic", ...)`, achados
+em `node_modules/@decartai/sdk/dist/realtime/observability/`; não documentados na página pública, só nos tipos
+TypeScript do pacote instalado). No teste seguinte funcionou perfeitamente — não chegamos a capturar o log do
+travamento, então a causa exata ficou sem confirmação (suspeita: rede/Wi-Fi instável no primeiro handshake). O
+log de diagnóstico ficou no código (`useDecartRealtime.ts`), sem custo extra, para o caso de o problema voltar.
+
+## Fase 2 (catálogo + visual), em andamento — 29/09/2026
+
+- Catálogo migrado para `catalog/products.json` (ver acima).
+- Adicionado: tela de espera em tela cheia (`components/IdleScreen.tsx`) com o aviso de LGPD da seção 4.6,
+  mensagens de erro amigáveis + botão "Tentar de novo" (seção 4.4 — o exemplo original mostrava o erro técnico
+  bruto do SDK), e toda a interface visível ao visitante traduzida para português.
+- Next.js elevado para a versão 16 (major) a pedido do usuário, para zerar a última vulnerabilidade do
+  `npm audit`; build e testes manuais OK depois do salto.
+- **Provisório, esperando o usuário:** nome do projeto ("Provador Virtual"), texto da tela de espera e a
+  redação exata do aviso de LGPD — o CLAUDE.md pede validação explícita dessa redação. Identidade visual
+  (logo, cores do laboratório) ainda não entrou; a interface está num tema escuro neutro.
+- **Ainda não feito:** dimensionar a interface para toque a 1,5–2 m (botões/textos maiores, seção 4.2); isso
+  é o próximo passo natural dentro da própria Fase 2.
 
 ## Pendente (preenchendo conforme formos testando)
 
-- Custos reais medidos: **ainda não** — falta medir uma sessão real de geração (a criação de token, testada, não
-  deve contar como geração ativa).
-- Peças que funcionam bem/mal no modelo: **ainda não testado**.
+- Custos reais medidos: **ainda não** — falta checar o painel de cobrança da conta Decart depois de alguns
+  testes reais.
+- Peças que funcionam bem/mal no modelo: só uma peça testada até agora (Camiseta SESI, resultado bom).
+- Controle de sessão por tempo/inatividade e atalhos do operador (seção 4.3): **não iniciado** (é a Fase 3).
+- Métricas locais (seção 4.5): **não iniciado** (é a Fase 4).
 - Teste de fundo (seção 4.7, caminhos B e A): **não iniciado**.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
