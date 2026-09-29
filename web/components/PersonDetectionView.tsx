@@ -127,23 +127,23 @@ export function PersonDetectionView({
       <IdleScreen visible={!personPresent} />
 
       {/* Selo de status (para quem está de olho no funcionamento; o texto grande fica na tela de espera) */}
-      <div className="absolute top-4 left-4 z-40">
+      <div className="absolute top-6 left-6 z-40">
         <div
-          className={`flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full ${label.className}`}
+          className={`flex items-center gap-2 text-base font-medium px-4 py-2 rounded-full ${label.className}`}
         >
           {label.pulse && (
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+            <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
           )}
           {label.text}
         </div>
       </div>
 
       {friendlyError && (
-        <div className="absolute bottom-4 left-4 right-4 z-40 flex items-center justify-between gap-4 rounded-lg bg-red-600/90 px-4 py-3 text-white">
-          <span className="text-sm">{friendlyError}</span>
+        <div className="absolute bottom-6 left-6 right-6 z-40 flex items-center justify-between gap-4 rounded-xl bg-red-600/90 px-6 py-4 text-white">
+          <span className="text-lg">{friendlyError}</span>
           <button
             onClick={() => window.location.reload()}
-            className="shrink-0 rounded-md bg-white/20 px-3 py-1.5 text-sm font-medium hover:bg-white/30"
+            className="shrink-0 rounded-lg bg-white/20 px-5 py-3 text-lg font-medium hover:bg-white/30"
           >
             Tentar de novo
           </button>
