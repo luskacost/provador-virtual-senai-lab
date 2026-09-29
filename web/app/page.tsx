@@ -5,9 +5,16 @@ import { Product } from "@/lib/catalog";
 import { useCamera } from "@/hooks/useCamera";
 import { useDecartRealtime } from "@/hooks/useDecartRealtime";
 import { usePersonDetection } from "@/hooks/usePersonDetection";
+import { useSessionTimer } from "@/hooks/useSessionTimer";
 import { urlToImageBlob, resizeImageBlob } from "@/lib/image-utils";
 import { ProductSidebar } from "@/components/ProductSidebar";
 import { PersonDetectionView } from "@/components/PersonDetectionView";
+
+// CLAUDE.md 4.3 - configurável. 90s é o padrão pedido; os outros dois números não têm um padrão fixado
+// no documento, escolhidos para o ritmo de uma exposição (ajustar aqui se ficar curto/longo demais).
+const SESSION_LIMIT_SECONDS = 90;
+const INACTIVITY_LIMIT_SECONDS = 45;
+const COOLDOWN_SECONDS = 5;
 
 export default function PersonDetectionPage() {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
@@ -24,6 +31,23 @@ export default function PersonDetectionPage() {
 
   const { personPresent, isReady: detectionReady } =
     usePersonDetection(localVideoElement);
+
+  // Encerramento forçado (limite de tempo, inatividade, aba escondida, atalho do operador): larga a
+  // conexão da Decart e limpa a peça selecionada. O cooldown do hook impede a mesma pessoa ser
+  // reconectada na hora pela detecção de presença (senão o limite não teria efeito nenhum).
+  const handleForceEnd = useCallback(() => {
+    disconnect();
+    setActiveProduct(null);
+    lastProductRef.current = null;
+    garmentBlobRef.current = null;
+  }, [disconnect]);
+
+  const timer = useSessionTimer({
+    limitSeconds: SESSION_LIMIT_SECONDS,
+    inactivityLimitSeconds: INACTIVITY_LIMIT_SECONDS,
+    cooldownSeconds: COOLDOWN_SECONDS,
+    onForceEnd: handleForceEnd,
+  });
 
   const handleRemoteStreamRef = useCallback(
     (ref: React.RefObject<HTMLVideoElement | null>) => {
@@ -51,7 +75,12 @@ export default function PersonDetectionPage() {
   useEffect(() => {
     if (!detectionReady || !stream) return;
 
-    if (personPresent && !clientRef.current && !connectingRef.current) {
+    if (
+      personPresent &&
+      !clientRef.current &&
+      !connectingRef.current &&
+      !timer.cooling
+    ) {
       // Person detected → connect to Decart
       connectingRef.current = true;
 
@@ -71,19 +100,54 @@ export default function PersonDetectionPage() {
 
         connectingRef.current = false;
 
-        // Re-apply last garment if reconnecting
-        if (rtClient && lastProductRef.current && garmentBlobRef.current) {
-          rtClient.setImage(garmentBlobRef.current, {
-            prompt: lastProductRef.current.prompt,
-            enhance: false,
-          });
+        if (rtClient) {
+          timer.start(); // CLAUDE.md 4.3: sessão começa a contar aqui, não no clique da primeira peça
+
+          // Re-apply last garment if reconnecting
+          if (lastProductRef.current && garmentBlobRef.current) {
+            rtClient.setImage(garmentBlobRef.current, {
+              prompt: lastProductRef.current.prompt,
+              enhance: false,
+            });
+          }
         }
       })();
     } else if (!personPresent && clientRef.current && !connectingRef.current) {
-      // No person → disconnect
+      // Pessoa saiu por conta própria (não foi um encerramento forçado): sem cooldown, a próxima pessoa
+      // (ou a mesma, voltando) já pode conectar na hora.
       disconnect();
+      timer.stop();
     }
-  }, [personPresent, detectionReady, stream, connect, disconnect, clientRef]);
+  }, [personPresent, detectionReady, stream, connect, disconnect, clientRef, timer]);
+
+  // Atalhos do operador (CLAUDE.md 4.3): Ctrl+Shift+E encerra a sessão atual agora; Ctrl+Shift+R
+  // reseta o app inteiro (mesmo caminho do botão "Tentar de novo" de erro: recarregar é o reset mais
+  // confiável). Combinação improvável de alguém apertar por acidente.
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (!e.ctrlKey || !e.shiftKey) return;
+      const key = e.key.toLowerCase();
+      if (key === "e") {
+        e.preventDefault();
+        timer.forceEnd("operador");
+      } else if (key === "r") {
+        e.preventDefault();
+        window.location.reload();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [timer]);
+
+  // Encerra se a aba/janela perder o foco (CLAUDE.md 4.3: "ao trocar de aba") — evita gastar sessão com
+  // ninguém olhando.
+  useEffect(() => {
+    function onVisibilityChange() {
+      if (document.hidden) timer.forceEnd("visibilidade");
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [timer]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -96,6 +160,7 @@ export default function PersonDetectionPage() {
     async (product: Product) => {
       setActiveProduct(product);
       lastProductRef.current = product;
+      timer.markInteraction(); // reinicia o relógio de inatividade (não o limite total da sessão)
 
       if (!clientRef.current) return;
 
@@ -108,7 +173,7 @@ export default function PersonDetectionPage() {
         enhance: false,
       });
     },
-    [clientRef]
+    [clientRef, timer]
   );
 
   return (
@@ -125,6 +190,8 @@ export default function PersonDetectionPage() {
         detectionReady={detectionReady}
         onRemoteStream={handleRemoteStreamRef}
         onLocalVideo={handleLocalVideoRef}
+        sessionSecondsLeft={timer.secondsLeft}
+        cooling={timer.cooling}
       />
     </div>
   );

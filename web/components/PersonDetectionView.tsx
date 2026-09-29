@@ -13,6 +13,10 @@ interface PersonDetectionViewProps {
   detectionReady: boolean;
   onRemoteStream: (ref: React.RefObject<HTMLVideoElement | null>) => void;
   onLocalVideo?: (ref: React.RefObject<HTMLVideoElement | null>) => void;
+  /** Segundos restantes da sessão (CLAUDE.md 4.3); null quando não há sessão ativa. */
+  sessionSecondsLeft?: number | null;
+  /** true durante o resfriamento pós-encerramento forçado (limite, inatividade, operador). */
+  cooling?: boolean;
 }
 
 function getDetectionLabel(
@@ -75,6 +79,8 @@ export function PersonDetectionView({
   detectionReady,
   onRemoteStream,
   onLocalVideo,
+  sessionSecondsLeft = null,
+  cooling = false,
 }: PersonDetectionViewProps) {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -124,7 +130,14 @@ export function PersonDetectionView({
       />
 
       {/* Tela de espera (CLAUDE.md 4.2) por cima do vídeo, some quando alguém é detectado */}
-      <IdleScreen visible={!personPresent} />
+      <IdleScreen visible={!personPresent || cooling} cooling={cooling} />
+
+      {/* Contagem regressiva da sessão (CLAUDE.md 4.3) */}
+      {sessionSecondsLeft != null && (
+        <div className="absolute top-6 right-6 z-40 rounded-full bg-black/60 px-4 py-2 text-base font-medium text-white">
+          Tempo restante: {sessionSecondsLeft}s
+        </div>
+      )}
 
       {/* Selo de status (para quem está de olho no funcionamento; o texto grande fica na tela de espera) */}
       <div className="absolute top-6 left-6 z-40">
