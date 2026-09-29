@@ -5,7 +5,9 @@ import catalogData from "@/catalog/products.json";
 export interface Product {
   id: string;
   nome: string;
-  /** Livre por enquanto (ex.: "top", "calca", "acessorio"); ainda sem filtro por categoria na interface. */
+  /** Livre por enquanto; ainda sem filtro por categoria na interface. O catálogo vai cobrir do vestuário
+   * formal ao EPI (roupa comum, uniforme, EPI de cabeça/mãos/corpo) — usar valores como "top", "formal",
+   * "epi-cabeca", "epi-maos", "epi-corpo" conforme as peças forem chegando. */
   categoria: string;
   /** Caminho em public/, ex.: "/catalog/arquivo.jpg". Fundo limpo, sem pessoa, >=512px (guia de fotos da Decart). */
   imagem: string;
