@@ -95,6 +95,15 @@ log de diagnóstico ficou no código (`useDecartRealtime.ts`), sem custo extra, 
   90 s de espera real; ficou para o teste do usuário (pode reduzir `SESSION_LIMIT_SECONDS` temporariamente
   para testar mais rápido).
 
+## Identidade visual, 29/09/2026: resolvida
+
+O laboratório é do **SENAI** (o logo diz "SENAI lab FASHION"); a camiseta SESI já no catálogo continua
+válida como peça real (é a marca impressa na peça, não a marca do app — as duas coisas são independentes).
+Cores extraídas por amostragem de pixel do arquivo real do logo (não estimadas visualmente): navy `#164092`,
+laranja `#ff6123`. O logo tem "FASHION" em preto, por isso aparece numa placa branca sobre o fundo escuro do
+quiosque (senão o texto desapareceria). Aplicado em `globals.css` (tokens Tailwind v4), na tela de espera e
+no topo da barra de peças. Título da página agora é "SENAI Lab Fashion".
+
 ## Direção do catálogo, 29/09/2026: do vestuário formal ao EPI
 
 O usuário quer que o catálogo reflita a realidade da indústria, não só camisetas — de roupa formal a
