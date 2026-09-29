@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+// Provisório: nome do projeto, sem identidade visual do laboratório ainda (logo/cores virão do usuário).
 export const metadata: Metadata = {
-  title: "Virtual Try-On - Person Detection Example",
-  description:
-    "Auto-detects when a person is in frame and connects to Decart only when needed",
+  title: "Provador Virtual",
+  description: "Experimente peças do laboratório ao vivo, na frente da câmera.",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body className="antialiased bg-gray-950 text-white">{children}</body>
     </html>
   );

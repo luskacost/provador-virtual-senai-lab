@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Product } from "@/lib/products";
+import { Product } from "@/lib/catalog";
 import { useCamera } from "@/hooks/useCamera";
 import { useDecartRealtime } from "@/hooks/useDecartRealtime";
 import { usePersonDetection } from "@/hooks/usePersonDetection";
@@ -99,7 +99,7 @@ export default function PersonDetectionPage() {
 
       if (!clientRef.current) return;
 
-      const blob = await urlToImageBlob(product.image);
+      const blob = await urlToImageBlob(product.imagem);
       const resized = await resizeImageBlob(blob);
       garmentBlobRef.current = resized;
 

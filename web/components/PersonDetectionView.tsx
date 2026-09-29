@@ -2,6 +2,8 @@
 
 import { useRef, useEffect } from "react";
 import { ConnectionStatus } from "@/hooks/useDecartRealtime";
+import { friendlyErrorMessage } from "@/lib/errors";
+import { IdleScreen } from "@/components/IdleScreen";
 
 interface PersonDetectionViewProps {
   localStream: MediaStream | null;
@@ -20,7 +22,7 @@ function getDetectionLabel(
 ): { text: string; className: string; pulse: boolean } {
   if (!detectionReady) {
     return {
-      text: "Loading detection...",
+      text: "Carregando detecção...",
       className: "bg-black/60 text-white",
       pulse: false,
     };
@@ -28,7 +30,7 @@ function getDetectionLabel(
 
   if (status === "generating") {
     return {
-      text: "Live",
+      text: "Ao vivo",
       className: "bg-green-500/90 text-white",
       pulse: true,
     };
@@ -36,7 +38,7 @@ function getDetectionLabel(
 
   if (status === "connecting") {
     return {
-      text: "Person detected - connecting...",
+      text: "Pessoa detectada - conectando...",
       className: "bg-blue-500/90 text-white",
       pulse: true,
     };
@@ -44,7 +46,7 @@ function getDetectionLabel(
 
   if (status === "connected") {
     return {
-      text: "Connected - click a product to try on",
+      text: "Conectado - toque numa peça para experimentar",
       className: "bg-blue-500/90 text-white",
       pulse: false,
     };
@@ -52,14 +54,14 @@ function getDetectionLabel(
 
   if (personPresent) {
     return {
-      text: "Person detected",
+      text: "Pessoa detectada",
       className: "bg-blue-500/90 text-white",
       pulse: true,
     };
   }
 
   return {
-    text: "Scanning...",
+    text: "Aguardando...",
     className: "bg-black/60 text-white",
     pulse: false,
   };
@@ -93,10 +95,11 @@ export function PersonDetectionView({
 
   const isGenerating = status === "generating";
   const label = getDetectionLabel(detectionReady, personPresent, status);
+  const friendlyError = friendlyErrorMessage(error);
 
   return (
     <div className="relative flex-1 bg-black">
-      {/* Local camera feed */}
+      {/* Câmera local */}
       <video
         ref={localVideoRef}
         autoPlay
@@ -108,7 +111,7 @@ export function PersonDetectionView({
         style={{ transform: "scaleX(-1)" }}
       />
 
-      {/* Remote AI stream */}
+      {/* Vídeo com a IA da Decart */}
       <video
         ref={remoteVideoRef}
         autoPlay
@@ -120,8 +123,11 @@ export function PersonDetectionView({
         style={{ transform: "scaleX(-1)" }}
       />
 
-      {/* Detection status badge */}
-      <div className="absolute top-4 left-4 z-20">
+      {/* Tela de espera (CLAUDE.md 4.2) por cima do vídeo, some quando alguém é detectado */}
+      <IdleScreen visible={!personPresent} />
+
+      {/* Selo de status (para quem está de olho no funcionamento; o texto grande fica na tela de espera) */}
+      <div className="absolute top-4 left-4 z-40">
         <div
           className={`flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full ${label.className}`}
         >
@@ -132,18 +138,15 @@ export function PersonDetectionView({
         </div>
       </div>
 
-      {/* Hint text when scanning */}
-      {detectionReady && !personPresent && status !== "generating" && (
-        <div className="absolute bottom-8 left-0 right-0 flex justify-center z-20">
-          <p className="text-white/50 text-sm">
-            Step in front of the camera to start
-          </p>
-        </div>
-      )}
-
-      {error && (
-        <div className="absolute bottom-4 left-4 right-4 bg-red-500/90 text-white text-sm px-4 py-2 rounded-lg z-20">
-          {error}
+      {friendlyError && (
+        <div className="absolute bottom-4 left-4 right-4 z-40 flex items-center justify-between gap-4 rounded-lg bg-red-600/90 px-4 py-3 text-white">
+          <span className="text-sm">{friendlyError}</span>
+          <button
+            onClick={() => window.location.reload()}
+            className="shrink-0 rounded-md bg-white/20 px-3 py-1.5 text-sm font-medium hover:bg-white/30"
+          >
+            Tentar de novo
+          </button>
         </div>
       )}
     </div>

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "sesi-camiseta-branca",
+    "nome": "Camiseta SESI",
+    "categoria": "top",
+    "imagem": "/catalog/sesi-camiseta-branca.jpg",
+    "prompt": "Substitute the current top with a white athletic t-shirt featuring a navy blue 'SESI' logo on the chest, blue sleeve cuff text, and a colorful geometric pattern near the hem",
+    "ativo": true
+  }
+]
