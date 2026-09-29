@@ -84,12 +84,23 @@ log de diagnóstico ficou no código (`useDecartRealtime.ts`), sem custo extra, 
 - **Ainda não feito:** dimensionar a interface para toque a 1,5–2 m (botões/textos maiores, seção 4.2); isso
   é o próximo passo natural dentro da própria Fase 2.
 
+## Fase 3 (sessão e robustez), 29/09/2026
+
+- `hooks/useSessionTimer.ts`: limite de 90 s por visitante com contagem regressiva visível, encerramento por
+  45 s de inatividade (sem trocar de peça — não conta contra o limite total), encerramento ao esconder a
+  aba, e um "cooldown" de 5 s pós-encerramento forçado para a mesma pessoa não ser reconectada na hora pela
+  detecção de presença. Os três números são constantes no topo de `app/page.tsx` (fácil de ajustar).
+- Atalhos do operador: `Ctrl+Shift+E` encerra a sessão atual, `Ctrl+Shift+R` reseta o app.
+- **Não testado de ponta a ponta:** o cronômetro só é validável com uma sessão real de câmera+Decart, e
+  90 s de espera real; ficou para o teste do usuário (pode reduzir `SESSION_LIMIT_SECONDS` temporariamente
+  para testar mais rápido).
+
 ## Pendente (preenchendo conforme formos testando)
 
 - Custos reais medidos: **ainda não** — falta checar o painel de cobrança da conta Decart depois de alguns
   testes reais.
 - Peças que funcionam bem/mal no modelo: só uma peça testada até agora (Camiseta SESI, resultado bom).
-- Controle de sessão por tempo/inatividade e atalhos do operador (seção 4.3): **não iniciado** (é a Fase 3).
+- Teste de ponta a ponta do limite de 90s e dos atalhos do operador: **não feito** (ver Fase 3 acima).
 - Métricas locais (seção 4.5): **não iniciado** (é a Fase 4).
 - Teste de fundo (seção 4.7, caminhos B e A): **não iniciado**.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
