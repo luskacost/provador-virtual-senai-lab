@@ -95,6 +95,19 @@ log de diagnóstico ficou no código (`useDecartRealtime.ts`), sem custo extra, 
   90 s de espera real; ficou para o teste do usuário (pode reduzir `SESSION_LIMIT_SECONDS` temporariamente
   para testar mais rápido).
 
+## Direção do catálogo, 29/09/2026: do vestuário formal ao EPI
+
+O usuário quer que o catálogo reflita a realidade da indústria, não só camisetas — de roupa formal a
+Equipamento de Proteção Individual (capacete, luvas, colete, macacão etc.). Tem o logo do laboratório e as
+cores (laranja e azul marinho) para a identidade visual do app.
+
+**Risco técnico por categoria (avaliação, ainda sem teste real):** o VTON da Decart já prova bem "top"
+(camiseta/jaqueta/blazer, inclusive no próprio catálogo de exemplo) e "headwear" (boné/gorro no exemplo —
+capacete deve seguir o mesmo padrão). Óculos de proteção (peça pequena, precisa encaixar exatamente nos
+olhos) e luvas (mãos se movem muito e são um ponto fraco conhecido de modelos de vídeo generativos) são mais
+arriscados — tratar como experimental antes de investir em mais fotos dessas categorias. Macacão/traje
+completo pode precisar de um prompt diferente ("substitute the current outfit" em vez de "...top") — testar.
+
 ## Pendente (preenchendo conforme formos testando)
 
 - Custos reais medidos: **ainda não** — falta checar o painel de cobrança da conta Decart depois de alguns
