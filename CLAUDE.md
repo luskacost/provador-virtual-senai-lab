@@ -86,11 +86,28 @@ O usuário tem Python intermediário e menos experiência com Next.js/TypeScript
 
 ### 4.5 Métricas do evento (para apresentar aos coordenadores)
 - Registrar **localmente** em JSON (ex: `data/metricas.json` via rota de API): início/fim de cada sessão, duração, peças experimentadas.
-- **Não gravar nem armazenar vídeo ou imagem dos visitantes.**
+- **O estande não grava nem guarda vídeo/imagem para si** (métricas são só texto/números). A exceção é a
+  seção 4.5b: uma foto/vídeo que o próprio visitante pediu para levar, e que não fica retida depois.
 - Script ou página simples que resume: total de sessões, duração média, ranking de peças.
 
+### 4.5b Foto/vídeo do visitante para ele levar (decidido em 30/09/2026)
+
+Pedido do usuário, inspirado no Anywear (seção 10): botões "Tirar foto" e "Gravar vídeo" (clipe curto) do
+resultado ao vivo. Implementado de um jeito que não conflita com a regra acima:
+- A captura fica **só na memória do processo** (nunca em `data/`, nunca em disco) por um tempo curto
+  (10 min), identificada por um token aleatório.
+- O quiosque mostra um **QR code**; o visitante escaneia com o próprio celular e baixa a cópia **nele**.
+  Depois de expirar, ninguém mais consegue acessar.
+- Isso também **revoga o item "gravação/compartilhamento de vídeo dos visitantes" da seção 8** (fora de
+  escopo), que datava de antes deste pedido.
+- **Atenção para o dia do evento:** o QR code só funciona se o navegador do quiosque abrir pelo **IP da
+  máquina na rede local** (não `localhost`) e o celular do visitante estiver na mesma rede Wi-Fi.
+- Limitação conhecida: o vídeo é `.webm`; pode não abrir direto em alguns iPhones sem um app compatível.
+
 ### 4.6 Privacidade (LGPD)
-- Aviso na tela inicial: o vídeo é processado em tempo real por um serviço externo e não é armazenado pelo estande. Texto curto; o usuário valida a redação.
+- Aviso na tela inicial: o vídeo é processado em tempo real por um serviço externo, só para gerar a
+  prévia da roupa; não é armazenado pelo estande. Ao usar "Tirar foto"/"Gravar vídeo", a captura é gerada
+  só para o visitante baixar por QR code e não fica retida depois. Texto curto; o usuário valida a redação.
 
 ### 4.7 Troca de fundo / cenário (OPCIONAL — só entra se o teste da Fase 1b for aprovado)
 
@@ -159,7 +176,10 @@ Se uma fase atrasar, avise e proponha o que cortar — nunca comprometa as fases
 
 ## 8. Fora do escopo agora
 
-Extensão de navegador para sites de terceiros · gravação/compartilhamento de vídeo dos visitantes · login · banco de dados · deploy em nuvem · app mobile · modo offline com MediaPipe (exceto a segmentação local usada no teste opcional da 4.7) · troca de fundo por IA no quiosque (exceto se aprovada na Fase 1b) · backend Python.
+Extensão de navegador para sites de terceiros · login · banco de dados · deploy em nuvem · app mobile · modo offline com MediaPipe (exceto a segmentação local usada no teste opcional da 4.7) · troca de fundo por IA no quiosque (exceto se aprovada na Fase 1b) · backend Python.
+
+(Gravação/compartilhamento de vídeo do visitante **saiu** desta lista em 30/09/2026 — ver seção 4.5b: virou
+um pedido explícito do usuário, implementado de forma efêmera/opt-in.)
 
 ---
 

@@ -53,8 +53,10 @@ export function IdleScreen({ visible, cooling = false }: IdleScreenProps) {
             Fique em frente à câmera para começar a experimentar as peças
           </p>
           <p className="mt-8 max-w-xl text-sm text-white/60">
-            Seu vídeo é processado em tempo real por um serviço externo, só para gerar a prévia da roupa, e
-            não é gravado nem armazenado pelo estande.
+            Seu vídeo é processado em tempo real por um serviço externo, só para gerar a prévia da roupa. Se
+            você tocar em &quot;Tirar foto&quot; ou &quot;Gravar vídeo&quot;, a captura fica disponível por
+            alguns minutos só para você baixar por QR code no seu celular — não fica guardada por nós depois
+            disso.
           </p>
         </>
       )}

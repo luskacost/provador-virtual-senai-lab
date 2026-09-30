@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import { ConnectionStatus } from "@/hooks/useDecartRealtime";
 import { friendlyErrorMessage } from "@/lib/errors";
 import { IdleScreen } from "@/components/IdleScreen";
+import { CaptureControls } from "@/components/CaptureControls";
 
 interface PersonDetectionViewProps {
   localStream: MediaStream | null;
@@ -150,6 +151,9 @@ export function PersonDetectionView({
           {label.text}
         </div>
       </div>
+
+      {/* Tirar foto / gravar vídeo (a pedido do usuário) - efêmero, ver hooks/useCapture.ts */}
+      <CaptureControls videoRef={remoteVideoRef} visible={status === "generating"} />
 
       {friendlyError && (
         <div className="absolute bottom-6 left-6 right-6 z-40 flex items-center justify-between gap-4 rounded-xl bg-red-600/90 px-6 py-4 text-white">
