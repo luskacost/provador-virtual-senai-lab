@@ -17,6 +17,8 @@ export interface Product {
   ativo?: boolean;
 }
 
-const ALL: Product[] = catalogData as Product[];
+/** Todas as peças, incluindo as com ativo:false. Usado pelas métricas (CLAUDE.md 4.5) para resolver o nome
+ * de uma peça experimentada no passado, mesmo que ela tenha sido desativada depois. */
+export const ALL_PRODUCTS: Product[] = catalogData as Product[];
 
-export const PRODUCTS: Product[] = ALL.filter((p) => p.ativo !== false);
+export const PRODUCTS: Product[] = ALL_PRODUCTS.filter((p) => p.ativo !== false);

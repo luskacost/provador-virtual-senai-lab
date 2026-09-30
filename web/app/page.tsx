@@ -5,7 +5,8 @@ import { Product } from "@/lib/catalog";
 import { useCamera } from "@/hooks/useCamera";
 import { useDecartRealtime } from "@/hooks/useDecartRealtime";
 import { usePersonDetection } from "@/hooks/usePersonDetection";
-import { useSessionTimer } from "@/hooks/useSessionTimer";
+import { ForceEndReason, useSessionTimer } from "@/hooks/useSessionTimer";
+import { SessionEndReason } from "@/lib/metrics";
 import { urlToImageBlob, resizeImageBlob } from "@/lib/image-utils";
 import { ProductSidebar } from "@/components/ProductSidebar";
 import { PersonDetectionView } from "@/components/PersonDetectionView";
@@ -29,18 +30,44 @@ export default function PersonDetectionPage() {
   const lastProductRef = useRef<Product | null>(null);
   const connectingRef = useRef(false);
 
+  // Métricas locais (CLAUDE.md 4.5): só timestamps, duração e ids de peça — nunca vídeo/imagem do
+  // visitante. sessionStartedAtRef não-nulo é como o resto do código sabe "há uma sessão para registrar".
+  const sessionStartedAtRef = useRef<string | null>(null);
+  const sessionProductsRef = useRef<string[]>([]);
+
+  const logSession = useCallback((endReason: SessionEndReason) => {
+    const startedAt = sessionStartedAtRef.current;
+    if (!startedAt) return; // nada a registrar (ex.: atalho do operador sem sessão ativa)
+    const endedAt = new Date().toISOString();
+    const durationSeconds = (new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000;
+    const payload = { startedAt, endedAt, durationSeconds, endReason, products: sessionProductsRef.current };
+    sessionStartedAtRef.current = null;
+    sessionProductsRef.current = [];
+    fetch("/api/metrics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch(() => {
+      // best-effort: metricas nunca devem quebrar a experiencia do visitante (CLAUDE.md 4.4)
+    });
+  }, []);
+
   const { personPresent, isReady: detectionReady } =
     usePersonDetection(localVideoElement);
 
   // Encerramento forçado (limite de tempo, inatividade, aba escondida, atalho do operador): larga a
   // conexão da Decart e limpa a peça selecionada. O cooldown do hook impede a mesma pessoa ser
   // reconectada na hora pela detecção de presença (senão o limite não teria efeito nenhum).
-  const handleForceEnd = useCallback(() => {
-    disconnect();
-    setActiveProduct(null);
-    lastProductRef.current = null;
-    garmentBlobRef.current = null;
-  }, [disconnect]);
+  const handleForceEnd = useCallback(
+    (reason: ForceEndReason) => {
+      logSession(reason);
+      disconnect();
+      setActiveProduct(null);
+      lastProductRef.current = null;
+      garmentBlobRef.current = null;
+    },
+    [disconnect, logSession]
+  );
 
   const timer = useSessionTimer({
     limitSeconds: SESSION_LIMIT_SECONDS,
@@ -102,6 +129,8 @@ export default function PersonDetectionPage() {
 
         if (rtClient) {
           timer.start(); // CLAUDE.md 4.3: sessão começa a contar aqui, não no clique da primeira peça
+          sessionStartedAtRef.current = new Date().toISOString(); // CLAUDE.md 4.5
+          sessionProductsRef.current = [];
 
           // Re-apply last garment if reconnecting
           if (lastProductRef.current && garmentBlobRef.current) {
@@ -115,10 +144,11 @@ export default function PersonDetectionPage() {
     } else if (!personPresent && clientRef.current && !connectingRef.current) {
       // Pessoa saiu por conta própria (não foi um encerramento forçado): sem cooldown, a próxima pessoa
       // (ou a mesma, voltando) já pode conectar na hora.
+      logSession("pessoa_saiu");
       disconnect();
       timer.stop();
     }
-  }, [personPresent, detectionReady, stream, connect, disconnect, clientRef, timer]);
+  }, [personPresent, detectionReady, stream, connect, disconnect, clientRef, timer, logSession]);
 
   // Atalhos do operador (CLAUDE.md 4.3): Ctrl+Shift+E encerra a sessão atual agora; Ctrl+Shift+R
   // reseta o app inteiro (mesmo caminho do botão "Tentar de novo" de erro: recarregar é o reset mais
@@ -161,6 +191,7 @@ export default function PersonDetectionPage() {
       setActiveProduct(product);
       lastProductRef.current = product;
       timer.markInteraction(); // reinicia o relógio de inatividade (não o limite total da sessão)
+      if (sessionStartedAtRef.current) sessionProductsRef.current.push(product.id);
 
       if (!clientRef.current) return;
 
