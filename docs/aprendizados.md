@@ -131,6 +131,25 @@ Achado de doc: no Next 16, `export const dynamic = "force-dynamic"` só foi remo
 habilita, então a forma clássica continua funcionando (confirmado na doc local antes de usar, não só
 lembrado do treinamento — é exatamente o tipo de mudança que o aviso do Next 16 alertou).
 
+## Foto/vídeo do visitante, 30/09/2026
+
+Pedido do usuário depois de ver o Anywear (referência do CLAUDE.md, seção 10): botões "Tirar foto" e
+"Gravar vídeo" do resultado ao vivo. Isso conflitava com duas frases explícitas do CLAUDE.md ("não
+gravar nem armazenar vídeo ou imagem dos visitantes" na 4.5, e "gravação/compartilhamento de vídeo dos
+visitantes" na lista de fora de escopo da seção 8) — parei, expliquei o conflito e a diferença entre
+"gravar e guardar no servidor do estande" vs. "gerar uma cópia efêmera que só o próprio visitante leva
+no celular por QR code", e o usuário aprovou o segundo caminho. Atualizei o CLAUDE.md (seção 4.5b) para
+documentar a decisão em vez de deixar o documento contradizendo o que foi construído.
+
+Implementação: captura fica só na memória do processo Node (nunca em disco), expira em 10 minutos, é
+entregue via QR code que aponta para `/api/capture/<token>`. Testado de ponta a ponta por API (upload,
+download idêntico ao original, QR decodificável, link inválido devolve página amigável) — a parte de
+câmera real (espelhamento no canvas, MediaRecorder) só o usuário pode testar.
+
+**Ponto operacional que vai precisar de atenção na Fase 6:** o link do QR code usa o host que o
+navegador do quiosque usou para abrir a página. Se abrir por `localhost`, o QR não funciona no celular
+de ninguém — o quiosque precisa abrir pelo IP da máquina na rede do evento.
+
 ## Pendente (preenchendo conforme formos testando)
 
 - Custos reais medidos: **ainda não** — falta checar o painel de cobrança da conta Decart depois de alguns
