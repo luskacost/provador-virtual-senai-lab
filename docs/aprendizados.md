@@ -117,6 +117,20 @@ olhos) e luvas (mãos se movem muito e são um ponto fraco conhecido de modelos 
 arriscados — tratar como experimental antes de investir em mais fotos dessas categorias. Macacão/traje
 completo pode precisar de um prompt diferente ("substitute the current outfit" em vez de "...top") — testar.
 
+## Fase 4 (métricas locais), 30/09/2026 — feita
+
+`data/metricas.json` (fora do git) grava início/fim, duração, motivo do encerramento e peças
+experimentadas de cada sessão — nunca vídeo/imagem. `/api/metrics` recebe o registro (envio best-effort
+do cliente: falha de rede/disco nunca quebra a experiência do visitante). Página `/metricas` (não
+linkada no quiosque; só quem souber o endereço acessa) resume para os coordenadores: total de sessões,
+duração média, ranking de peças, motivos de encerramento, últimas 50 sessões. Testado de ponta a ponta
+com sessões falsas antes do commit (removidas depois).
+
+Achado de doc: no Next 16, `export const dynamic = "force-dynamic"` só foi removido quando o novo
+"Cache Components" está habilitado (`next.config.ts` com a flag `cacheComponents`) — este projeto não
+habilita, então a forma clássica continua funcionando (confirmado na doc local antes de usar, não só
+lembrado do treinamento — é exatamente o tipo de mudança que o aviso do Next 16 alertou).
+
 ## Pendente (preenchendo conforme formos testando)
 
 - Custos reais medidos: **ainda não** — falta checar o painel de cobrança da conta Decart depois de alguns
