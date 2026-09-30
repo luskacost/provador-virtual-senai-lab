@@ -14,5 +14,29 @@
     "imagem": "/catalog/colete-alta-visibilidade.jpg",
     "prompt": "Substitute the current top with an orange high-visibility mesh safety vest featuring grey reflective stripes, black trim, a front zipper, and multiple utility pockets",
     "ativo": true
+  },
+  {
+    "id": "camiseta-verde-salvia",
+    "nome": "Camiseta Verde Sálvia",
+    "categoria": "top",
+    "imagem": "/catalog/camiseta-verde-salvia.jpg",
+    "prompt": "Substitute the current top with a sage green crewneck t-shirt with a relaxed regular fit and no print",
+    "ativo": true
+  },
+  {
+    "id": "camiseta-areia",
+    "nome": "Camiseta Areia",
+    "categoria": "top",
+    "imagem": "/catalog/camiseta-areia.jpg",
+    "prompt": "Substitute the current top with a beige crewneck t-shirt with a relaxed regular fit and no print",
+    "ativo": true
+  },
+  {
+    "id": "camiseta-preta-oversized",
+    "nome": "Camiseta Preta Oversized",
+    "categoria": "top",
+    "imagem": "/catalog/camiseta-preta-oversized.jpg",
+    "prompt": "Substitute the current top with a black oversized crewneck t-shirt with dropped shoulders and no print",
+    "ativo": true
   }
 ]
