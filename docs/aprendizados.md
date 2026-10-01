@@ -150,6 +150,24 @@ câmera real (espelhamento no canvas, MediaRecorder) só o usuário pode testar.
 navegador do quiosque usou para abrir a página. Se abrir por `localhost`, o QR não funciona no celular
 de ninguém — o quiosque precisa abrir pelo IP da máquina na rede do evento.
 
+## Trabalho sem supervisão, 01/10/2026
+
+O usuário não pôde validar em tempo real por um dia; pediu prioridades. Escolhi só trabalho seguro e
+reversível (documentação + revisão de código), nada que gaste sessão real da Decart ou precise do
+julgamento dele:
+- `docs/operacao-evento.md` e `docs/checklist-estande.md` (Fase 6, adiantados).
+- `docs/como-adicionar-peca.md` — guia prático para cadastrar peça sem mim, com a tabela de "a foto
+  serve?" que já vínhamos usando na prática.
+- `docs/aviso-lgpd-opcoes.md` — 3 opções de redação para ele escolher; **não aplicada nenhuma mudança de
+  código** (a seção 4.6 pede validação explícita da redação, não é decisão minha).
+- `web/README.md` reescrito — ainda descrevia o exemplo genérico da Decart (`lib/products.ts`,
+  `public/products/`, link para `../standalone/`, nada disso existe/se aplica mais aqui).
+- Revisão de robustez do código já existente (sessão, captura, conexão) — não achei bugs reais; só um
+  comentário explicativo a mais em `capture-store.ts`.
+- Confirmei `npm audit` com 0 vulnerabilidades depois do `qrcode`.
+- **Não toquei:** teste de fundo (seção 4.7, precisa de aprovação explícita + pessoa real na câmera),
+  catálogo (sem fotos novas para processar), redação final de LGPD (esperando a escolha dele).
+
 ## Pendente (preenchendo conforme formos testando)
 
 - Custos reais medidos: **ainda não** — falta checar o painel de cobrança da conta Decart depois de alguns
