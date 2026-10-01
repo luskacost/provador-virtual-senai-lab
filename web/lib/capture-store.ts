@@ -25,6 +25,8 @@ function sweepExpired(): void {
 }
 
 // Limpeza periódica para o Map não crescer sem limite se ninguém escanear o QR code de uma captura.
+// Em "next dev" cada recarga de módulo cria mais um desses (inofensivo: só mais um timer de 1/min fazendo
+// um sweep vazio) - em produção (next start) o módulo carrega uma vez só, então nem isso acontece.
 setInterval(sweepExpired, 60_000);
 
 export function put(data: Buffer, contentType: string): string {
