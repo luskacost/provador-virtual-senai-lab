@@ -78,5 +78,21 @@
     "imagem": "/catalog/jaqueta-epi-azul-marinho.jpg",
     "prompt": "Substitute the current top with a navy blue flame-resistant work jacket featuring a stand collar, two chest flap pockets, and grey reflective stripes across the chest and sleeves",
     "ativo": true
+  },
+  {
+    "id": "camisa-popover-azul-marinho",
+    "nome": "Camisa Popover Azul-Marinho",
+    "categoria": "top",
+    "imagem": "/catalog/camisa-popover-azul-marinho.jpg",
+    "prompt": "Substitute the current top with a navy blue short-sleeve popover shirt featuring a collared placket with buttons, cuffed cap sleeves, and a curved hem with front slit pockets",
+    "ativo": true
+  },
+  {
+    "id": "jaqueta-bombeiro-turnout",
+    "nome": "Jaqueta de Bombeiro (Turnout Gear)",
+    "categoria": "epi-corpo",
+    "imagem": "/catalog/jaqueta-bombeiro-turnout.jpg",
+    "prompt": "Substitute the current top with a tan flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, arms, and hem, and bellows pockets with reflective flaps",
+    "ativo": true
   }
 ]

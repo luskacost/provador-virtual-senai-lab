@@ -227,4 +227,14 @@ Dutti/PIECES recusadas antes:**
 **Lição para a Etapa 2:** vale documentar no cadastro de peça *de onde* a foto veio (print de loja, foto
 própria, ferramenta de IA) — teria resolvido a dúvida sobre o macacão em duas cores sem precisar
 adivinhar.
+
+## Mais 2 peças de 05/10 — também testadas antes no Anywear
+
+- `camisa-popover-azul-marinho` — sem marca d'água nem logo. **Diferença em relação ao resto do
+  catálogo:** é foto de modelo vestindo a peça, não peça isolada/manequim-fantasma como a seção 4.1 do
+  CLAUDE.md pede ("peça sozinha em fundo neutro"). Deixei entrar porque o usuário já validou o resultado
+  do try-on no Anywear com essa mesma foto; se aparecer problema de pose/enquadramento durante os testes
+  de campo (Fase 5), essa é a primeira peça a revisar.
+- `jaqueta-bombeiro-turnout` — jaqueta de bombeiro (turnout gear), manequim-fantasma, sem logo/marca
+  legível visível (só um clipe metálico e um bolso sem texto).
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
