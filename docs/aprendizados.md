@@ -150,6 +150,28 @@ câmera real (espelhamento no canvas, MediaRecorder) só o usuário pode testar.
 navegador do quiosque usou para abrir a página. Se abrir por `localhost`, o QR não funciona no celular
 de ninguém — o quiosque precisa abrir pelo IP da máquina na rede do evento.
 
+## Foto/vídeo, parte 2: QR code abandonado por impressão local, 05/10/2026
+
+Usuário testou o QR code em `localhost` — não funcionou, como esperado (celular não alcança
+`localhost`). Antes de simplesmente trocar para o IP da rede (a correção óbvia), levantei um risco mais
+sério: muitas redes de evento/feira têm **isolamento entre dispositivos** (client/AP isolation), um
+recurso de segurança comum em Wi-Fi público que impede um celular de alcançar outro aparelho na mesma
+rede — quebraria o QR code no dia do evento mesmo com tudo certo em teste doméstico, sem aviso prévio.
+Dei 4 alternativas (hotspot do próprio notebook, túnel público, impressão local, remover a
+funcionalidade); o usuário escolheu **impressão local** e pediu para remover o que não serviria mais
+(gravação de vídeo, já que não há solução de entrega sem rede que valha o esforço agora).
+
+Resultado: `window.print()` com CSS de `@media print` isolando só a foto (sem biblioteca nova) — a foto
+não sai mais da máquina nem passa por rede ou servidor, então **o aviso sobre abrir por IP/localhost não
+vale mais** (era só por causa do QR code). Removido: as rotas `/api/capture`, o armazenamento efêmero em
+memória, a dependência `qrcode`, e toda a parte de vídeo (botão, `MediaRecorder`, `canvas.captureStream`).
+CLAUDE.md atualizado (seção 4.5b reescrita com o histórico; "gravação de vídeo" volta à lista de fora de
+escopo da seção 8).
+
+**Lição para a Etapa 2:** qualquer recurso que dependa de dois dispositivos na mesma rede local (QR code,
+cast, etc.) precisa ser testado na rede real de destino antes de confiar nele — redes domésticas quase
+nunca têm isolamento entre dispositivos, mas redes de evento/escritório/convidado frequentemente têm.
+
 ## Trabalho sem supervisão, 01/10/2026
 
 O usuário não pôde validar em tempo real por um dia; pediu prioridades. Escolhi só trabalho seguro e
