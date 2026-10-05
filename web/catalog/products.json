@@ -94,5 +94,13 @@
     "imagem": "/catalog/jaqueta-bombeiro-turnout.jpg",
     "prompt": "Substitute the current top with a tan flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, arms, and hem, and bellows pockets with reflective flaps",
     "ativo": true
+  },
+  {
+    "id": "jaqueta-bombeiro-vermelha",
+    "nome": "Jaqueta de Bombeiro Vermelha",
+    "categoria": "epi-corpo",
+    "imagem": "/catalog/jaqueta-bombeiro-vermelha.png",
+    "prompt": "Substitute the current top with a red flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, shoulders, and sleeves, and multiple bellows pockets with D-ring clips",
+    "ativo": true
   }
 ]

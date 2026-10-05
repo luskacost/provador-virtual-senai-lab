@@ -238,7 +238,8 @@ adivinhar.
 - `jaqueta-bombeiro-turnout` — jaqueta de bombeiro (turnout gear), manequim-fantasma, sem logo/marca
   legível visível (só um clipe metálico e um bolso sem texto).
 
-**Rejeitada:** jaqueta de bombeiro vermelha — texto "Xtreme®" bem legível no peito, mais um logo "X"
-bordado no ombro. Mesmo critério de marca comercial em destaque das rejeições anteriores (Dickies, patch
-da camisa EPI cinza).
+**Rejeitada:** jaqueta de bombeiro vermelha (1ª versão) — texto "Xtreme®" bem legível no peito, mais um
+logo "X" bordado no ombro. Mesmo critério de marca comercial em destaque das rejeições anteriores
+(Dickies, patch da camisa EPI cinza). O usuário enviou outra foto do mesmo tipo de peça sem marca visível
+— entrou como `jaqueta-bombeiro-vermelha`.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
