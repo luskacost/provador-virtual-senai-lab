@@ -9,7 +9,10 @@ import Image from "next/image";
 // O logo (web/public/brand/senai-lab-fashion.png) tem a palavra "FASHION" em preto — some num fundo escuro
 // — por isso fica numa placa branca, prática comum para logos com texto escuro sobre UI dark.
 //
-// Redação do aviso de LGPD validada pelo usuário em 05/10/2026 (opção A de docs/aviso-lgpd-opcoes.md).
+// Redação do aviso de LGPD validada pelo usuário em 05/10/2026 (opção A de docs/aviso-lgpd-opcoes.md); a
+// frase sobre a foto foi ajustada no mesmo dia, quando a entrega por QR code virou impressão local — tom
+// e tamanho iguais ao que já foi validado, mas a troca de mecanismo não voltou a passar por aprovação
+// explícita frase por frase.
 interface IdleScreenProps {
   visible: boolean;
   /** true logo depois de um encerramento forçado (limite de tempo, inatividade, operador) — troca o
@@ -53,9 +56,8 @@ export function IdleScreen({ visible, cooling = false }: IdleScreenProps) {
           </p>
           <p className="mt-8 max-w-xl text-sm text-white/60">
             Seu vídeo é processado em tempo real por um serviço externo, só para gerar a prévia da roupa. Se
-            você tocar em &quot;Tirar foto&quot; ou &quot;Gravar vídeo&quot;, a captura fica disponível por
-            alguns minutos só para você baixar por QR code no seu celular — não fica guardada por nós depois
-            disso.
+            você tocar em &quot;Tirar foto&quot;, a imagem vai direto para a impressora do estande — não
+            fica guardada por nós.
           </p>
         </>
       )}

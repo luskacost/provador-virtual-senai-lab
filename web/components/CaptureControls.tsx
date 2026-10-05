@@ -1,15 +1,16 @@
 "use client";
 
 import { useCapture } from "@/hooks/useCapture";
+import { printImage } from "@/lib/print-image";
 
 interface CaptureControlsProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  /** Só mostra os botões quando há uma peça ao vivo (status === "generating") */
+  /** Só mostra o botão quando há uma peça ao vivo (status === "generating") */
   visible: boolean;
 }
 
-// Botões "Tirar foto" / "Gravar vídeo" + o modal com o QR code para o visitante levar a captura no
-// próprio celular (nada fica guardado pelo estande — ver hooks/useCapture.ts e lib/capture-store.ts).
+// Botão "Tirar foto" + prévia com opção de imprimir direto no quiosque (sem rede, sem QR code - ver
+// hooks/useCapture.ts e lib/print-image.ts).
 export function CaptureControls({ videoRef, visible }: CaptureControlsProps) {
   const cap = useCapture(videoRef);
 
@@ -17,40 +18,14 @@ export function CaptureControls({ videoRef, visible }: CaptureControlsProps) {
 
   return (
     <>
-      <div className="absolute bottom-6 left-1/2 z-40 flex -translate-x-1/2 gap-4">
-        {cap.state === "recording" ? (
+      {visible && cap.state === "idle" && (
+        <div className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2">
           <button
-            onClick={cap.stopRecording}
-            className="flex items-center gap-2 rounded-full bg-red-600 px-6 py-3 text-lg font-medium text-white shadow-lg"
+            onClick={cap.takePhoto}
+            className="rounded-full bg-brand-orange px-6 py-3 text-lg font-medium text-white shadow-lg"
           >
-            <span className="h-3 w-3 animate-pulse rounded-full bg-white" />
-            Parar ({cap.maxRecordSeconds - cap.recordingSeconds}s)
+            📷 Tirar foto
           </button>
-        ) : (
-          visible && (
-            <>
-              <button
-                onClick={cap.takePhoto}
-                disabled={cap.state === "enviando"}
-                className="rounded-full bg-brand-orange px-6 py-3 text-lg font-medium text-white shadow-lg disabled:opacity-50"
-              >
-                📷 Tirar foto
-              </button>
-              <button
-                onClick={cap.startRecording}
-                disabled={cap.state === "enviando"}
-                className="rounded-full bg-white px-6 py-3 text-lg font-medium text-gray-900 shadow-lg disabled:opacity-50"
-              >
-                🎥 Gravar vídeo
-              </button>
-            </>
-          )
-        )}
-      </div>
-
-      {cap.state === "enviando" && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
-          <p className="text-xl text-white">Preparando...</p>
         </div>
       )}
 
@@ -66,25 +41,27 @@ export function CaptureControls({ videoRef, visible }: CaptureControlsProps) {
         </div>
       )}
 
-      {cap.state === "pronto" && cap.result && (
+      {cap.state === "pronto" && cap.photoDataUrl && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-black/85 px-8 text-center">
-          <h2 className="text-3xl font-bold text-white">
-            Escaneie para levar {cap.result.kind === "foto" ? "sua foto" : "seu vídeo"}
-          </h2>
-          <div className="rounded-2xl bg-white p-4">
-            {/* eslint-disable-next-line @next/next/no-img-element -- data URL, next/image não se aplica */}
-            <img src={cap.result.qrDataUrl} alt="QR code para baixar sua captura" width={320} height={320} />
+          <h2 className="text-3xl font-bold text-white">Sua foto ficou assim</h2>
+          <div className="max-h-[50vh] overflow-hidden rounded-2xl bg-white p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element -- prévia de uma data URL gerada no canvas */}
+            <img src={cap.photoDataUrl} alt="Prévia da foto capturada" className="max-h-[46vh] rounded-xl" />
           </div>
-          <p className="max-w-md text-white/70">
-            Aponte a câmera do seu celular para o código. O link funciona por {Math.round(cap.result.expiresInSeconds / 60)}{" "}
-            minutos e não fica guardado depois disso.
-          </p>
-          <button
-            onClick={cap.dismiss}
-            className="rounded-full bg-brand-orange px-8 py-3 text-lg font-medium text-white"
-          >
-            Fechar
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => printImage(cap.photoDataUrl!)}
+              className="rounded-full bg-brand-orange px-8 py-3 text-lg font-medium text-white"
+            >
+              🖨️ Imprimir
+            </button>
+            <button
+              onClick={cap.dismiss}
+              className="rounded-full bg-white/20 px-8 py-3 text-lg font-medium text-white"
+            >
+              Fechar
+            </button>
+          </div>
         </div>
       )}
     </>
