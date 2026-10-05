@@ -9,8 +9,7 @@ import Image from "next/image";
 // O logo (web/public/brand/senai-lab-fashion.png) tem a palavra "FASHION" em preto — some num fundo escuro
 // — por isso fica numa placa branca, prática comum para logos com texto escuro sobre UI dark.
 //
-// TEXTO AINDA PROVISÓRIO: a redação exata do aviso de LGPD não foi validada pelo usuário (CLAUDE.md pede
-// validação explícita).
+// Redação do aviso de LGPD validada pelo usuário em 05/10/2026 (opção A de docs/aviso-lgpd-opcoes.md).
 interface IdleScreenProps {
   visible: boolean;
   /** true logo depois de um encerramento forçado (limite de tempo, inatividade, operador) — troca o

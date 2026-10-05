@@ -11,8 +11,8 @@ import { urlToImageBlob, resizeImageBlob } from "@/lib/image-utils";
 import { ProductSidebar } from "@/components/ProductSidebar";
 import { PersonDetectionView } from "@/components/PersonDetectionView";
 
-// CLAUDE.md 4.3 - configurável. 90s é o padrão pedido; os outros dois números não têm um padrão fixado
-// no documento, escolhidos para o ritmo de uma exposição (ajustar aqui se ficar curto/longo demais).
+// CLAUDE.md 4.3 - configurável. 90s é o padrão pedido pelo documento; o usuário confirmou em 05/10/2026
+// manter os valores de teste abaixo por enquanto (revisitar antes do evento - docs/checklist-estande.md).
 const SESSION_LIMIT_SECONDS = 30;
 const INACTIVITY_LIMIT_SECONDS = 15;
 const COOLDOWN_SECONDS = 10;

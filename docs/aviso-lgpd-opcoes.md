@@ -1,10 +1,9 @@
 # Opções de redação — aviso de LGPD na tela de espera
 
-CLAUDE.md (seção 4.6) pede que **você** valide a redação exata. Três opções, do mais curto ao mais
-completo. Nenhuma foi aplicada ainda além da opção A, que é o texto atual (provisório) em
-`web/components/IdleScreen.tsx`. Me diga qual prefere (ou peça ajustes) e eu aplico.
+**Decidido em 05/10/2026: opção A**, validada pelo usuário. É o texto em
+`web/components/IdleScreen.tsx`. As opções B e C ficam registradas aqui só de referência.
 
-## Opção A — atual (curta, informal)
+## Opção A — escolhida (curta, informal)
 
 > Seu vídeo é processado em tempo real por um serviço externo, só para gerar a prévia da roupa. Se você
 > tocar em "Tirar foto" ou "Gravar vídeo", a captura fica disponível por alguns minutos só para você
