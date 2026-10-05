@@ -198,4 +198,33 @@ julgamento dele:
 - Teste de ponta a ponta do limite de 90s e dos atalhos do operador: **não feito** (ver Fase 3 acima).
 - Métricas locais (seção 4.5): **não iniciado** (é a Fase 4).
 - Teste de fundo (seção 4.7, caminhos B e A): **não iniciado**.
+
+## Lote de peças de 05/10 — roupas formais/sociais + EPI testadas antes no Anywear
+
+O usuário enviou 7 fotos já testadas por ele na ferramenta Anywear (da própria Decart) e pediu para
+colocarmos todas. Mantive o critério de vetagem de sempre (marca d'água, logo/etiqueta de loja visível,
+aparência de gerado por IA) mesmo com a aprovação prévia no Anywear, porque esse critério é sobre direito
+de imagem da fotografia do produto, não sobre qualidade do try-on.
+
+**Adicionadas (5):**
+- `vestido-off-white-babados` — vestido sem manga, barra de babados em camadas, cinto preto.
+- `macacao-xadrez-marrom` e `macacao-verde-militar` — mesmo macacão (decote drapeado, perna larga), duas
+  cores. Observação: por terem exatamente a mesma silhueta/pose, duas cores diferentes, podem ser
+  variações de cor do mesmo anúncio de loja (comum em e-commerce) **ou** o mesmo gerado duas vezes por IA
+  com cor alterada — não dá para confirmar só pela imagem. Sem marca/logo visível, então deixei entrar;
+  se algum coordenador reconhecer a origem, reavaliar.
+- `conjunto-listrado-preto-branco` — camisa risca de giz preta/branca + minissaia preta.
+- `jaqueta-epi-azul-marinho` — jaqueta EPI azul-marinho com fitas refletivas; só tem uma etiqueta pequena
+  de gola (padrão em qualquer peça real, ilegível na foto), sem logo de marca em destaque — critério
+  diferente de uma etiqueta de peito grande e legível.
+
+**Rejeitadas (2) — marca legível em destaque, mesmo problema das 9 fotos da Zara/H&M/Massimo
+Dutti/PIECES recusadas antes:**
+- Macacão laranja: bolso do peito traz o texto "Dickies" bem legível.
+- Camisa cinza EPI com fita amarela: patch de marca costurado na manga direita (ilegível de tão pequeno
+  na foto, mas reconhecível como etiqueta de fabricante — mesmo risco de direito de imagem do produto).
+
+**Lição para a Etapa 2:** vale documentar no cadastro de peça *de onde* a foto veio (print de loja, foto
+própria, ferramenta de IA) — teria resolvido a dúvida sobre o macacão em duas cores sem precisar
+adivinhar.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).

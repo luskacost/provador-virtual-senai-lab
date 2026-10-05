@@ -38,5 +38,45 @@
     "imagem": "/catalog/camiseta-preta-oversized.jpg",
     "prompt": "Substitute the current top with a black oversized crewneck t-shirt with dropped shoulders and no print",
     "ativo": true
+  },
+  {
+    "id": "vestido-off-white-babados",
+    "nome": "Vestido Off-White Babados",
+    "categoria": "vestido",
+    "imagem": "/catalog/vestido-off-white-babados.jpg",
+    "prompt": "Substitute the current outfit with an off-white sleeveless dress featuring a fitted bodice, a tiered ruffled pleated skirt, and a black belt with a silver buckle at the waist",
+    "ativo": true
+  },
+  {
+    "id": "macacao-xadrez-marrom",
+    "nome": "Macacão Xadrez Marrom",
+    "categoria": "macacao",
+    "imagem": "/catalog/macacao-xadrez-marrom.jpg",
+    "prompt": "Substitute the current outfit with a brown houndstooth-pattern sleeveless jumpsuit featuring a draped cowl neckline, wide-leg trousers, and a thin tan leather belt at the waist",
+    "ativo": true
+  },
+  {
+    "id": "macacao-verde-militar",
+    "nome": "Macacão Verde Militar",
+    "categoria": "macacao",
+    "imagem": "/catalog/macacao-verde-militar.jpg",
+    "prompt": "Substitute the current outfit with an olive green sleeveless jumpsuit featuring a draped cowl neckline, wide-leg trousers, and a tan leather belt with a gold buckle at the waist",
+    "ativo": true
+  },
+  {
+    "id": "conjunto-listrado-preto-branco",
+    "nome": "Conjunto Listrado Preto e Branco",
+    "categoria": "conjunto",
+    "imagem": "/catalog/conjunto-listrado-preto-branco.jpg",
+    "prompt": "Substitute the current outfit with a black and white pinstripe long-sleeve shirt with chest flap pockets tucked into a black A-line mini skirt",
+    "ativo": true
+  },
+  {
+    "id": "jaqueta-epi-azul-marinho",
+    "nome": "Jaqueta EPI Azul Marinho",
+    "categoria": "epi-corpo",
+    "imagem": "/catalog/jaqueta-epi-azul-marinho.jpg",
+    "prompt": "Substitute the current top with a navy blue flame-resistant work jacket featuring a stand collar, two chest flap pockets, and grey reflective stripes across the chest and sleeves",
+    "ativo": true
   }
 ]
