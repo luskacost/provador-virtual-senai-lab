@@ -237,4 +237,8 @@ adivinhar.
   de campo (Fase 5), essa é a primeira peça a revisar.
 - `jaqueta-bombeiro-turnout` — jaqueta de bombeiro (turnout gear), manequim-fantasma, sem logo/marca
   legível visível (só um clipe metálico e um bolso sem texto).
+
+**Rejeitada:** jaqueta de bombeiro vermelha — texto "Xtreme®" bem legível no peito, mais um logo "X"
+bordado no ombro. Mesmo critério de marca comercial em destaque das rejeições anteriores (Dickies, patch
+da camisa EPI cinza).
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
