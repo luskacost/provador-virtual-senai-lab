@@ -242,4 +242,15 @@ adivinhar.
 logo "X" bordado no ombro. Mesmo critério de marca comercial em destaque das rejeições anteriores
 (Dickies, patch da camisa EPI cinza). O usuário enviou outra foto do mesmo tipo de peça sem marca visível
 — entrou como `jaqueta-bombeiro-vermelha`.
+
+## Primeira peça de mão: `luvas-protecao-azul`
+
+Luvas de proteção/solda azuis com reforço de couro marrom na palma, sem marca/logo visível. **Categoria
+nova para o catálogo (`epi-maos`)** — até aqui só tínhamos EPI de tronco (colete, jaquetas). Usei o padrão
+"add" do prompt (em vez de "substitute") porque é um acessório que normalmente não está presente na
+imagem original, diferente de um top que troca outro top.
+
+**Risco não testado:** mãos se movem muito mais rápido e saem de quadro com muito mais frequência que o
+torso — não sei se o VTON acompanha bem. Prioridade alta para o teste "uma peça, uma pessoa real" do
+`docs/checklist-estande.md` antes de confiar nela no evento.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).

@@ -102,5 +102,13 @@
     "imagem": "/catalog/jaqueta-bombeiro-vermelha.png",
     "prompt": "Substitute the current top with a red flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, shoulders, and sleeves, and multiple bellows pockets with D-ring clips",
     "ativo": true
+  },
+  {
+    "id": "luvas-protecao-azul",
+    "nome": "Luvas de Proteção Azuis",
+    "categoria": "epi-maos",
+    "imagem": "/catalog/luvas-protecao-azul.png",
+    "prompt": "Add a pair of blue leather welding safety gloves with orange reinforced palm patches, extended wrist cuffs, and contrast stitching to the hands",
+    "ativo": true
   }
 ]
