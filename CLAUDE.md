@@ -90,24 +90,29 @@ O usuário tem Python intermediário e menos experiência com Next.js/TypeScript
   seção 4.5b: uma foto/vídeo que o próprio visitante pediu para levar, e que não fica retida depois.
 - Script ou página simples que resume: total de sessões, duração média, ranking de peças.
 
-### 4.5b Foto/vídeo do visitante para ele levar (decidido em 30/09/2026)
+### 4.5b Foto do visitante para ele levar (decidido em 30/09/2026, mecanismo trocado em 05/10/2026)
 
-Pedido do usuário, inspirado no Anywear (seção 10): botões "Tirar foto" e "Gravar vídeo" (clipe curto) do
-resultado ao vivo. Implementado de um jeito que não conflita com a regra acima:
-- A captura fica **só na memória do processo** (nunca em `data/`, nunca em disco) por um tempo curto
-  (10 min), identificada por um token aleatório.
-- O quiosque mostra um **QR code**; o visitante escaneia com o próprio celular e baixa a cópia **nele**.
-  Depois de expirar, ninguém mais consegue acessar.
-- Isso também **revoga o item "gravação/compartilhamento de vídeo dos visitantes" da seção 8** (fora de
-  escopo), que datava de antes deste pedido.
-- **Atenção para o dia do evento:** o QR code só funciona se o navegador do quiosque abrir pelo **IP da
-  máquina na rede local** (não `localhost`) e o celular do visitante estiver na mesma rede Wi-Fi.
-- Limitação conhecida: o vídeo é `.webm`; pode não abrir direto em alguns iPhones sem um app compatível.
+Pedido do usuário, inspirado no Anywear (seção 10): botão "Tirar foto" do resultado ao vivo.
+
+**Primeira tentativa (30/09, abandonada em 05/10):** QR code para o visitante baixar no próprio celular,
+com a captura guardada só na memória do processo por um tempo curto. Funcionou em testes, mas foi
+abandonada: exige o navegador do quiosque abrir pelo IP da rede local (não `localhost`) **e** depende da
+rede Wi-Fi do evento não ter isolamento entre dispositivos (muitas redes de evento/feira têm esse
+isolamento por segurança, o que quebraria o recurso sem aviso no dia) — risco grande demais para testar
+só no dia.
+
+**Mecanismo atual:** a foto é capturada no navegador (canvas, espelhada como o visitante vê na tela, com
+o logo do SENAI Lab Fashion marcado no canto) e impressa **direto pela impressora do quiosque**
+(`window.print()`). Nunca passa por rede, nunca toca um servidor — mais simples e mais robusto que o QR
+code. Exige uma impressora configurada e conectada ao quiosque.
+
+**Gravação de vídeo foi testada e removida em 05/10/2026** (sem solução de entrega aceitável sem rede) —
+volta a valer o item "gravação de vídeo dos visitantes" da seção 8 como fora de escopo.
 
 ### 4.6 Privacidade (LGPD)
 - Aviso na tela inicial: o vídeo é processado em tempo real por um serviço externo, só para gerar a
-  prévia da roupa; não é armazenado pelo estande. Ao usar "Tirar foto"/"Gravar vídeo", a captura é gerada
-  só para o visitante baixar por QR code e não fica retida depois. Texto curto; o usuário valida a redação.
+  prévia da roupa; não é armazenado pelo estande. Ao usar "Tirar foto", a imagem vai direto para a
+  impressora do estande e não fica guardada por nós. Texto curto; o usuário valida a redação.
 
 ### 4.7 Troca de fundo / cenário (OPCIONAL — só entra se o teste da Fase 1b for aprovado)
 
@@ -176,10 +181,12 @@ Se uma fase atrasar, avise e proponha o que cortar — nunca comprometa as fases
 
 ## 8. Fora do escopo agora
 
-Extensão de navegador para sites de terceiros · login · banco de dados · deploy em nuvem · app mobile · modo offline com MediaPipe (exceto a segmentação local usada no teste opcional da 4.7) · troca de fundo por IA no quiosque (exceto se aprovada na Fase 1b) · backend Python.
+Extensão de navegador para sites de terceiros · login · banco de dados · deploy em nuvem · app mobile · modo offline com MediaPipe (exceto a segmentação local usada no teste opcional da 4.7) · troca de fundo por IA no quiosque (exceto se aprovada na Fase 1b) · backend Python · **gravação/compartilhamento de vídeo dos visitantes**.
 
-(Gravação/compartilhamento de vídeo do visitante **saiu** desta lista em 30/09/2026 — ver seção 4.5b: virou
-um pedido explícito do usuário, implementado de forma efêmera/opt-in.)
+(Esse último item saiu da lista em 30/09/2026 a pedido do usuário, foi implementado e testado, e **voltou
+a entrar** em 05/10/2026: sem rede disponível no app, dependência de rede do evento não ter isolamento
+entre dispositivos era risco demais para testar só no dia — ver seção 4.5b. **Foto** do visitante
+continua no escopo, via impressão local, sem essa dependência de rede.)
 
 ---
 

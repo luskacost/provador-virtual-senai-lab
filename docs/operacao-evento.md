@@ -13,25 +13,15 @@
    npm run build
    npm start
    ```
-   Isso sobe em `http://localhost:3000` — **mas não abra por esse endereço** (ver aviso abaixo sobre o QR
-   code). Em desenvolvimento/teste rápido, `npm run dev` também funciona.
-4. Abra o navegador (Chrome ou Edge) **pelo IP da máquina na rede do evento**, não por `localhost`:
-   - Descubra o IP: `ipconfig` (Windows), procure "Endereço IPv4" na placa de rede Wi-Fi/Ethernet em uso.
-   - Abra `http://<esse-ip>:3000` no navegador do quiosque.
-5. Coloque o navegador em tela cheia (F11) e, se possível, em modo quiosque de verdade (atalho do Chrome:
-   `chrome --kiosk http://<ip>:3000`) para esconder a barra de endereço e impedir que o visitante navegue
-   para outro lugar.
-6. Autorize a câmera quando o navegador perguntar (só pergunta na primeira vez por perfil de navegador).
-
-### ⚠️ Por que não pode ser `localhost`
-
-A funcionalidade de **tirar foto / gravar vídeo** mostra um QR code que o celular do visitante escaneia
-para baixar a captura. Esse QR code aponta para o mesmo endereço que o navegador do quiosque usou para
-abrir a página. Se for `localhost`, o link só funciona dentro da própria máquina do quiosque — o celular do
-visitante nunca vai conseguir abrir. **O celular do visitante também precisa estar na mesma rede Wi-Fi.**
-
-Teste isso **antes** do evento: abra pelo IP, escaneie o QR code com o seu próprio celular (no Wi-Fi do
-local) e confirme que baixa.
+   Isso sobe em `http://localhost:3000` — **pode abrir por esse endereço mesmo**, sem problema (a foto
+   agora é impressa direto pelo navegador, não depende mais de rede nem de IP específico).
+4. Coloque o navegador em tela cheia (F11) e, se possível, em modo quiosque de verdade (atalho do Chrome:
+   `chrome --kiosk http://localhost:3000`) para esconder a barra de endereço e impedir que o visitante
+   navegue para outro lugar.
+5. Autorize a câmera quando o navegador perguntar (só pergunta na primeira vez por perfil de navegador).
+6. Confirme que há uma **impressora configurada como padrão** no Windows, com papel. O botão "Tirar foto"
+   abre o diálogo de impressão do navegador — teste uma vez antes do evento para garantir que a impressora
+   certa está selecionada e que o diálogo não fica pedindo confirmação demais (ver "Se algo der errado").
 
 ## Atalhos do operador
 
@@ -52,8 +42,7 @@ operador, não para o visitante).
 | "Não conseguimos acessar a câmera" | Confirme que nenhum outro programa está usando a câmera (Teams, outro navegador); recarregue. |
 | "Não encontramos uma câmera conectada" | Verifique o cabo/driver da câmera; chame o responsável técnico. |
 | Vídeo mostra "Ao vivo" mas a imagem trava | Problema conhecido de rede (ver `docs/aprendizados.md`, "achado técnico" sobre diagnóstico do SDK). Recarregue; se repetir, teste a conexão de internet do local. |
-| QR code da foto/vídeo não abre no celular | Confirme que o navegador do quiosque foi aberto pelo IP da rede (não `localhost`) e que o celular está na mesma Wi-Fi. |
-| Vídeo baixado pelo QR code não abre no iPhone | Limitação conhecida: o vídeo é `.webm`; alguns iPhones não tocam nativamente. A foto (`.jpg`) não tem esse problema. |
+| Botão "Imprimir" abre o diálogo mas nada sai da impressora | Confira a impressora padrão do Windows e se há papel/tinta. Teste a impressão de outro programa para isolar se o problema é do app ou da impressora. |
 | Quiosque parece "pulando" visitantes | Pode ser o limite de inatividade curto demais para o ritmo do local — ver "Valores da sessão" abaixo. |
 
 Em qualquer caso que não resolver na hora: `Ctrl+Shift+R` reseta tudo. Se nem isso resolver, feche o
@@ -72,13 +61,13 @@ valores finais antes do evento — 30 s pode ser curto demais para alguém realm
 
 ## Métricas
 
-`http://<ip-do-quiosque>:3000/metricas` (não tem link na interface do quiosque — acesse direto por esse
-endereço, só na rede local). Mostra total de sessões, duração média, ranking de peças e as últimas 50
-sessões. Os dados ficam em `web/data/metricas.json`, fora do git.
+`http://localhost:3000/metricas` (não tem link na interface do quiosque — acesse direto por esse
+endereço). Mostra total de sessões, duração média, ranking de peças e as últimas 50 sessões. Os dados
+ficam em `web/data/metricas.json`, fora do git.
 
 ## Antes de ligar no dia do evento (resumo — ver checklist completo em `docs/checklist-estande.md`)
 
 - Testar com a luz real do local (webcams caem de FPS com pouca luz — ver `docs/hardware.md`, do plano
   anterior, que tem a mesma observação para a câmera desta máquina).
-- Testar o QR code de foto/vídeo com o Wi-Fi real do evento.
+- Testar a impressão da foto com a impressora e o papel reais do evento.
 - Confirmar que o catálogo (`web/catalog/products.json`) só tem peças aprovadas (`"ativo": true`).
