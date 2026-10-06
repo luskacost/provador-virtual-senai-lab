@@ -261,6 +261,20 @@ Capacete de segurança laranja, testado antes pelo usuário no Anywear. Sem marc
 nova (`epi-cabeca`)** — mesma lógica das luvas: cabeça é território ainda mais crítico que mão pro VTON
 (é onde o rosto está, foco principal do modelo) — prioridade de teste com pessoa real antes do evento.
 
+## Primeira peça de rosto: `oculos-esportivo-preto`
+
+Óculos esportivo preto, lente única escura, sem marca/logo visível. **Categoria nova (`acessorio`)** — não
+é EPI certificado (é estilo esportivo, não proteção), por isso não entrou em `epi-cabeca`. Mesmo risco das
+luvas/capacete, só que ainda mais sensível: fica direto no rosto, onde a identidade da pessoa é mais
+evidente — prioridade alta de teste com pessoa real.
+
+## Renomeação do catálogo, 06/10/2026
+
+A pedido do usuário, todos os nomes (`nome`) do catálogo foram trocados de descrição literal de cor/tecido
+pra nome de produto de loja (tipo + estilo, cor por último) — ex.: "Camiseta Preta Oversized" →
+"Camiseta Oversized Preta"; "Macacão Xadrez Marrom" → "Macacão Pied-de-Poule Marrom" (nome correto do
+estampado). Só o campo `nome` mudou; `id`/`categoria`/`prompt`/`imagem` ficaram intactos.
+
 ## Teste de fundo, 1ª rodada — 06/10/2026 (Fase 1b, seção 4.7)
 
 Ferramenta: `web/app/teste-fundo/` (isolada, ver commit `176a92b`). Testado pelo próprio usuário, sozinho,

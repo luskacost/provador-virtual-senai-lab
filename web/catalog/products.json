@@ -118,5 +118,13 @@
     "imagem": "/catalog/capacete-seguranca-laranja.jpg",
     "prompt": "Add an orange hard hat safety helmet to the head",
     "ativo": true
+  },
+  {
+    "id": "oculos-esportivo-preto",
+    "nome": "Óculos Esportivo Preto",
+    "categoria": "acessorio",
+    "imagem": "/catalog/oculos-esportivo-preto.jpg",
+    "prompt": "Add black sport wraparound sunglasses with a single dark shield lens to the face",
+    "ativo": true
   }
 ]
