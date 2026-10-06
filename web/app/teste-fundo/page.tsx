@@ -20,6 +20,10 @@ import { urlToImageBlob, resizeImageBlob } from "@/lib/image-utils";
 const COST_PER_SECOND = 0.02;
 
 const BACKGROUND_PRESETS = [
+  {
+    label: "Laranja sólido (comparar com Caminho B)",
+    value: "a solid flat orange (#ff6123) background, no texture, no gradient, like a seamless photography backdrop",
+  },
   { label: "Estúdio cinza claro", value: "a plain light grey photography studio backdrop" },
   { label: "Praia (exemplo da doc)", value: "a sandy beach with clear blue water" },
   { label: "Rua ao anoitecer", value: "a city street at golden hour, blurred background" },
