@@ -10,7 +10,7 @@
     "setup:mediapipe": "node scripts/setup-mediapipe.mjs"
   },
   "dependencies": {
-    "@decartai/sdk": "latest",
+    "@decartai/sdk": "^0.2.5",
     "@mediapipe/tasks-vision": "^0.10.18",
     "next": "^16.3.6",
     "react": "^19.0.0",
