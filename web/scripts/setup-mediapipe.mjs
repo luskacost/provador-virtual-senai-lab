@@ -25,6 +25,12 @@ const MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
 const MODEL_OUT = path.join(OUT_DIR, "pose_landmarker_lite.task");
 
+// Segmentação de pessoa (selfie) - só usada no teste isolado de fundo da seção 4.7 (app/teste-fundo/),
+// nunca no quiosque principal. Mesmo motivo de auto-hospedar: nada de CDN externa em tempo de execução.
+const SEGMENTER_URL =
+  "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite";
+const SEGMENTER_OUT = path.join(OUT_DIR, "selfie_segmenter.tflite");
+
 function copyWasm() {
   if (!existsSync(WASM_SRC)) {
     console.warn(`[setup-mediapipe] ${WASM_SRC} não existe — rode "npm install" antes.`);
@@ -38,26 +44,27 @@ function copyWasm() {
   return true;
 }
 
-async function downloadModel() {
-  if (existsSync(MODEL_OUT)) {
-    console.log("[setup-mediapipe] pose_landmarker_lite.task já existe, não baixei de novo.");
+async function downloadFile(url, out, label) {
+  if (existsSync(out)) {
+    console.log(`[setup-mediapipe] ${label} já existe, não baixei de novo.`);
     return true;
   }
-  console.log(`[setup-mediapipe] baixando ${MODEL_URL} ...`);
+  console.log(`[setup-mediapipe] baixando ${url} ...`);
   try {
-    const res = await fetch(MODEL_URL);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     mkdirSync(OUT_DIR, { recursive: true });
-    await pipeline(res.body, createWriteStream(MODEL_OUT));
-    console.log("[setup-mediapipe] modelo salvo em public/mediapipe/pose_landmarker_lite.task");
+    await pipeline(res.body, createWriteStream(out));
+    console.log(`[setup-mediapipe] salvo em public/mediapipe/${path.basename(out)}`);
     return true;
   } catch (err) {
-    console.warn(`[setup-mediapipe] AVISO: não consegui baixar o modelo (${err.message}). A detecção de\n` +
-      "  presença vai falhar até isso ser corrigido. Rode de novo com internet: node scripts/setup-mediapipe.mjs");
+    console.warn(`[setup-mediapipe] AVISO: não consegui baixar ${label} (${err.message}). Rode de novo com\n` +
+      "  internet: node scripts/setup-mediapipe.mjs");
     return false;
   }
 }
 
 const wasmOk = copyWasm();
-const modelOk = await downloadModel();
-if (!wasmOk || !modelOk) process.exitCode = 0; // aviso, não erro — não quero travar o "npm install" por isso
+const poseOk = await downloadFile(MODEL_URL, MODEL_OUT, "pose_landmarker_lite.task (detecção de presença)");
+const segmenterOk = await downloadFile(SEGMENTER_URL, SEGMENTER_OUT, "selfie_segmenter.tflite (teste de fundo)");
+if (!wasmOk || !poseOk || !segmenterOk) process.exitCode = 0; // aviso, não erro — não travar o "npm install" por isso
