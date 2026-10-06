@@ -254,3 +254,31 @@ imagem original, diferente de um top que troca outro top.
 torso — não sei se o VTON acompanha bem. Prioridade alta para o teste "uma peça, uma pessoa real" do
 `docs/checklist-estande.md` antes de confiar nela no evento.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
+
+## Teste de fundo, 1ª rodada — 06/10/2026 (Fase 1b, seção 4.7)
+
+Ferramenta: `web/app/teste-fundo/` (isolada, ver commit `176a92b`). Testado pelo próprio usuário, sozinho,
+na própria luz/webcam — ainda falta testar com outras pessoas e na luz do evento (critério da seção 4.7).
+
+**Caminho B (VTON + fundo local, cor sólida laranja):**
+- Bordas aguentaram bem no geral.
+- **Achado importante:** o tom da cor laranja do fundo **mudava visivelmente** conforme o usuário se
+  movimentava com a roupa trocada no corpo. Isso indica que o VTON **não está só compositando por cima**
+  do fundo que mandamos — ele resintetiza o frame inteiro e aparentemente ajusta cor/luz global frame a
+  frame, inclusive onde não devia ter nada pra "corrigir". **Isso invalida parcialmente a hipótese da
+  seção 4.7** ("será que o VTON preserva um fundo já trocado?") — a resposta, por este teste, é: não
+  perfeitamente, pelo menos não com cor sólida.
+- Achado secundário: o movimento da cadeira (objeto, não corpo) fazia o fundo "desaparecer" num ponto
+  específico — provável confusão do segmentador (o `selfie_segmenter` é treinado pra pessoa, não pra
+  objetos/mobília ao redor). Usuário avaliou como pouco relevante no geral.
+
+**Caminho A (lucy-2.5, cenário "praia"):**
+- Performance aceitável, sem detalhe ainda sobre se a cor/luz do fundo também deriva com o movimento
+  (não comparado lado a lado com o mesmo tipo de fundo do Caminho B) nem sobre a qualidade da roupa
+  comparada ao VTON dedicado.
+
+**Ainda em aberto antes de decidir:**
+- Testar o Caminho A com uma cor sólida (ou o mesmo tipo de fundo do B) pra saber se a deriva de cor é um
+  problema do VTON especificamente ou dos modelos Lucy em geral.
+- Comparar a qualidade da própria roupa entre A e B lado a lado (mesma peça, mesma luz).
+- Testar com mais gente, não só o usuário.
