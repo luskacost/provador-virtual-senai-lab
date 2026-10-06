@@ -41,13 +41,13 @@ export function ProductSidebar({
                   : "border-gray-700 hover:border-gray-500"
               }`}
             >
-              <div className="relative aspect-square bg-gray-800">
+              <div className="relative aspect-square bg-white">
                 <Image
                   src={product.imagem}
                   alt={product.nome}
                   fill
                   priority
-                  className="object-cover"
+                  className="object-contain p-2"
                   sizes="200px"
                 />
               </div>
