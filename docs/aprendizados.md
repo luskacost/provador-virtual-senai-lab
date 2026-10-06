@@ -277,8 +277,20 @@ na própria luz/webcam — ainda falta testar com outras pessoas e na luz do eve
   (não comparado lado a lado com o mesmo tipo de fundo do Caminho B) nem sobre a qualidade da roupa
   comparada ao VTON dedicado.
 
+## Teste de fundo, 2ª rodada — 06/10/2026: Caminho A com o mesmo fundo laranja sólido
+
+Objetivo: isolar se a deriva de cor do fundo (vista no Caminho B) é um problema do VTON especificamente
+ou dos modelos Lucy em geral. Testado com a Camiseta Preta Oversized + preset "Laranja sólido" (mesma cor
+do teste B, `#ff6123`, mas pedida por texto ao `lucy-2.5`, não compositada localmente).
+
+**Resultado: a cor do fundo e a qualidade da roupa ficaram "muito boas" — sem a deriva de tom que apareceu
+no Caminho B.** Isso aponta pra deriva de cor ser um problema **específico do VTON** (`lucy-vton-3.5`
+resintetizando o frame todo, inclusive o fundo que já mandamos pronto) — não um problema geral da família
+Lucy. Até aqui, isso favorece o **Caminho A** sobre o B no critério de estabilidade do fundo.
+
 **Ainda em aberto antes de decidir:**
-- Testar o Caminho A com uma cor sólida (ou o mesmo tipo de fundo do B) pra saber se a deriva de cor é um
-  problema do VTON especificamente ou dos modelos Lucy em geral.
-- Comparar a qualidade da própria roupa entre A e B lado a lado (mesma peça, mesma luz).
-- Testar com mais gente, não só o usuário.
+- Repetir o teste do Caminho A em cenários realistas (não só cor sólida) pra confirmar que a roupa continua
+  boa com um fundo fotográfico de verdade (praia/rua/vitrine), não só com cor lisa.
+- Testar com mais gente, não só o usuário, e na luz do ambiente do evento.
+- Ainda não comparamos a borda (cabelo, mãos, movimento rápido) do Caminho A especificamente — só a cor e
+  a roupa. Vale repetir a observação de bordas que foi feita no B.
