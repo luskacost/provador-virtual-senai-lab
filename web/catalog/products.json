@@ -1,7 +1,7 @@
 [
   {
     "id": "sesi-camiseta-branca",
-    "nome": "Camiseta SESI",
+    "nome": "Camiseta Esportiva SESI",
     "categoria": "top",
     "imagem": "/catalog/sesi-camiseta-branca.jpg",
     "prompt": "Substitute the current top with a white athletic t-shirt featuring a navy blue 'SESI' logo on the chest, blue sleeve cuff text, and a colorful geometric pattern near the hem",
@@ -9,7 +9,7 @@
   },
   {
     "id": "colete-alta-visibilidade",
-    "nome": "Colete de Alta Visibilidade",
+    "nome": "Colete Refletivo Multibolso",
     "categoria": "epi-corpo",
     "imagem": "/catalog/colete-alta-visibilidade.jpg",
     "prompt": "Substitute the current top with an orange high-visibility mesh safety vest featuring grey reflective stripes, black trim, a front zipper, and multiple utility pockets",
@@ -17,7 +17,7 @@
   },
   {
     "id": "camiseta-verde-salvia",
-    "nome": "Camiseta Verde Sálvia",
+    "nome": "Camiseta Básica Verde Sálvia",
     "categoria": "top",
     "imagem": "/catalog/camiseta-verde-salvia.jpg",
     "prompt": "Substitute the current top with a sage green crewneck t-shirt with a relaxed regular fit and no print",
@@ -25,7 +25,7 @@
   },
   {
     "id": "camiseta-areia",
-    "nome": "Camiseta Areia",
+    "nome": "Camiseta Básica Areia",
     "categoria": "top",
     "imagem": "/catalog/camiseta-areia.jpg",
     "prompt": "Substitute the current top with a beige crewneck t-shirt with a relaxed regular fit and no print",
@@ -33,7 +33,7 @@
   },
   {
     "id": "camiseta-preta-oversized",
-    "nome": "Camiseta Preta Oversized",
+    "nome": "Camiseta Oversized Preta",
     "categoria": "top",
     "imagem": "/catalog/camiseta-preta-oversized.jpg",
     "prompt": "Substitute the current top with a black oversized crewneck t-shirt with dropped shoulders and no print",
@@ -41,7 +41,7 @@
   },
   {
     "id": "vestido-off-white-babados",
-    "nome": "Vestido Off-White Babados",
+    "nome": "Vestido Mini Babados Off-White",
     "categoria": "vestido",
     "imagem": "/catalog/vestido-off-white-babados.jpg",
     "prompt": "Substitute the current outfit with an off-white sleeveless dress featuring a fitted bodice, a tiered ruffled pleated skirt, and a black belt with a silver buckle at the waist",
@@ -49,7 +49,7 @@
   },
   {
     "id": "macacao-xadrez-marrom",
-    "nome": "Macacão Xadrez Marrom",
+    "nome": "Macacão Pied-de-Poule Marrom",
     "categoria": "macacao",
     "imagem": "/catalog/macacao-xadrez-marrom.jpg",
     "prompt": "Substitute the current outfit with a brown houndstooth-pattern sleeveless jumpsuit featuring a draped cowl neckline, wide-leg trousers, and a thin tan leather belt at the waist",
@@ -57,7 +57,7 @@
   },
   {
     "id": "macacao-verde-militar",
-    "nome": "Macacão Verde Militar",
+    "nome": "Macacão Alfaiataria Verde Militar",
     "categoria": "macacao",
     "imagem": "/catalog/macacao-verde-militar.jpg",
     "prompt": "Substitute the current outfit with an olive green sleeveless jumpsuit featuring a draped cowl neckline, wide-leg trousers, and a tan leather belt with a gold buckle at the waist",
@@ -65,7 +65,7 @@
   },
   {
     "id": "conjunto-listrado-preto-branco",
-    "nome": "Conjunto Listrado Preto e Branco",
+    "nome": "Conjunto Camisa e Mini Listrado",
     "categoria": "conjunto",
     "imagem": "/catalog/conjunto-listrado-preto-branco.jpg",
     "prompt": "Substitute the current outfit with a black and white pinstripe long-sleeve shirt with chest flap pockets tucked into a black A-line mini skirt",
@@ -73,7 +73,7 @@
   },
   {
     "id": "jaqueta-epi-azul-marinho",
-    "nome": "Jaqueta EPI Azul Marinho",
+    "nome": "Jaqueta Multibolso Azul-Marinho",
     "categoria": "epi-corpo",
     "imagem": "/catalog/jaqueta-epi-azul-marinho.jpg",
     "prompt": "Substitute the current top with a navy blue flame-resistant work jacket featuring a stand collar, two chest flap pockets, and grey reflective stripes across the chest and sleeves",
@@ -81,7 +81,7 @@
   },
   {
     "id": "camisa-popover-azul-marinho",
-    "nome": "Camisa Popover Azul-Marinho",
+    "nome": "Camisa Popover Manga Curta Azul-Marinho",
     "categoria": "top",
     "imagem": "/catalog/camisa-popover-azul-marinho.jpg",
     "prompt": "Substitute the current top with a navy blue short-sleeve popover shirt featuring a collared placket with buttons, cuffed cap sleeves, and a curved hem with front slit pockets",
@@ -89,7 +89,7 @@
   },
   {
     "id": "jaqueta-bombeiro-turnout",
-    "nome": "Jaqueta de Bombeiro (Turnout Gear)",
+    "nome": "Jaqueta de Combate a Incêndio",
     "categoria": "epi-corpo",
     "imagem": "/catalog/jaqueta-bombeiro-turnout.jpg",
     "prompt": "Substitute the current top with a tan flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, arms, and hem, and bellows pockets with reflective flaps",
@@ -97,7 +97,7 @@
   },
   {
     "id": "jaqueta-bombeiro-vermelha",
-    "nome": "Jaqueta de Bombeiro Vermelha",
+    "nome": "Jaqueta de Combate a Incêndio Vermelha",
     "categoria": "epi-corpo",
     "imagem": "/catalog/jaqueta-bombeiro-vermelha.png",
     "prompt": "Substitute the current top with a red flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, shoulders, and sleeves, and multiple bellows pockets with D-ring clips",
@@ -105,7 +105,7 @@
   },
   {
     "id": "luvas-protecao-azul",
-    "nome": "Luvas de Proteção Azuis",
+    "nome": "Luvas de Solda Reforçadas",
     "categoria": "epi-maos",
     "imagem": "/catalog/luvas-protecao-azul.png",
     "prompt": "Add a pair of blue leather welding safety gloves with orange reinforced palm patches, extended wrist cuffs, and contrast stitching to the hands",
