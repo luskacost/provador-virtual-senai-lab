@@ -110,5 +110,13 @@
     "imagem": "/catalog/luvas-protecao-azul.png",
     "prompt": "Add a pair of blue leather welding safety gloves with orange reinforced palm patches, extended wrist cuffs, and contrast stitching to the hands",
     "ativo": true
+  },
+  {
+    "id": "capacete-seguranca-laranja",
+    "nome": "Capacete de Segurança Laranja",
+    "categoria": "epi-cabeca",
+    "imagem": "/catalog/capacete-seguranca-laranja.jpg",
+    "prompt": "Add an orange hard hat safety helmet to the head",
+    "ativo": true
   }
 ]

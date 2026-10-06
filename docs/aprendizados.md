@@ -255,6 +255,12 @@ torso — não sei se o VTON acompanha bem. Prioridade alta para o teste "uma pe
 `docs/checklist-estande.md` antes de confiar nela no evento.
 - Pedidos/ideias de visitantes e coordenadores: **nenhum ainda** (projeto não foi a campo).
 
+## Primeira peça de cabeça: `capacete-seguranca-laranja`
+
+Capacete de segurança laranja, testado antes pelo usuário no Anywear. Sem marca/logo visível. **Categoria
+nova (`epi-cabeca`)** — mesma lógica das luvas: cabeça é território ainda mais crítico que mão pro VTON
+(é onde o rosto está, foco principal do modelo) — prioridade de teste com pessoa real antes do evento.
+
 ## Teste de fundo, 1ª rodada — 06/10/2026 (Fase 1b, seção 4.7)
 
 Ferramenta: `web/app/teste-fundo/` (isolada, ver commit `176a92b`). Testado pelo próprio usuário, sozinho,
