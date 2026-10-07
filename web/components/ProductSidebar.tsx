@@ -13,9 +13,9 @@ export function ProductSidebar({
   onSelectProduct,
 }: ProductSidebarProps) {
   return (
-    <aside className="w-[26rem] shrink-0 border-r border-gray-800 bg-brand-navy-dark flex flex-col">
-      <div className="p-6 border-b border-gray-800">
-        <div className="mb-4 inline-block rounded-lg bg-white px-3 py-2">
+    <aside className="w-[26rem] shrink-0 border-r border-gray-800 bg-brand-navy-dark flex flex-col portrait:w-full portrait:h-[38vh] portrait:border-r-0 portrait:border-t">
+      <div className="p-6 border-b border-gray-800 portrait:flex portrait:items-center portrait:gap-6 portrait:py-4">
+        <div className="mb-4 inline-block rounded-lg bg-white px-3 py-2 portrait:mb-0 portrait:shrink-0">
           <Image
             src="/brand/senai-lab-fashion.png"
             alt="SENAI Lab Fashion"
@@ -30,7 +30,7 @@ export function ProductSidebar({
         </p>
       </div>
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 portrait:grid-cols-4">
           {PRODUCTS.map((product) => (
             <button
               key={product.id}
@@ -52,12 +52,14 @@ export function ProductSidebar({
                 />
               </div>
               <div className="p-3 bg-gray-900">
-                <p className="text-lg font-medium truncate">{product.nome}</p>
+                <p className="text-lg font-medium leading-snug line-clamp-2 min-h-[2.75em]">
+                  {product.nome}
+                </p>
               </div>
             </button>
           ))}
           {PRODUCTS.length === 0 && (
-            <p className="col-span-2 text-lg text-gray-500">
+            <p className="col-span-full text-lg text-gray-500">
               Nenhuma peça ativa. Edite catalog/products.json.
             </p>
           )}

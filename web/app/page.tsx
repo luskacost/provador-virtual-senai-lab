@@ -208,7 +208,8 @@ export default function PersonDetectionPage() {
   );
 
   return (
-    <div className="h-screen flex">
+    // Tela em pé (TV vertical do estande): vídeo em cima, catálogo embaixo. Na horizontal, catálogo ao lado.
+    <div className="h-screen flex portrait:flex-col-reverse">
       <ProductSidebar
         activeProduct={activeProduct}
         onSelectProduct={handleSelectProduct}
