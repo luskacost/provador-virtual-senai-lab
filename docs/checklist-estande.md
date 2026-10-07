@@ -19,8 +19,10 @@
 - [ ] Testar a impressão da foto (botão "Tirar foto" → "Imprimir") com a impressora que vai estar no
       evento, já com o papel certo.
 - [ ] Confirmar que `DECART_API_KEY` tem saldo/limite suficiente para o dia (checar o painel da Decart).
-- [ ] Decidir a resposta para a seção 4.7 (cenário de fundo): ficou de fora do escopo, ou foi testado e
-      aprovado? Se ficou de fora, confirmar que o fundo físico do estande é neutro.
+- [x] Decidir a resposta para a seção 4.7 (cenário de fundo): **decidido em 07/10/2026 — troca de fundo
+      por IA fica FORA do evento** (testada e reprovada: fundo que não aparece, peça duplicada, custo alto;
+      ver `docs/aprendizados.md`). O estande usa **fundo físico neutro**.
+- [ ] Montar/confirmar o fundo físico neutro do estande (liso, sem estampa, sem objetos atrás da pessoa).
 
 ## Na véspera
 

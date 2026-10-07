@@ -314,3 +314,34 @@ Lucy. Até aqui, isso favorece o **Caminho A** sobre o B no critério de estabil
 - Testar com mais gente, não só o usuário, e na luz do ambiente do evento.
 - Ainda não comparamos a borda (cabelo, mãos, movimento rápido) do Caminho A especificamente — só a cor e
   a roupa. Vale repetir a observação de bordas que foi feita no B.
+
+## Teste de fundo, 3ª rodada e decisão final — 07/10/2026: troca de fundo FORA do evento
+
+Caminho A (`lucy-2.5`) com cenários fotográficos, testado pelo usuário:
+- Jaqueta de Combate a Incêndio + fundo "passarela": **o fundo não apareceu**, e a jaqueta ficou muito
+  desalinhada com o corpo e com aspecto superficial.
+- Camiseta Esportiva SESI + fundo "praia": o fundo apareceu, mas a camiseta ficou muito artificial e
+  **duplicada** (uma segunda camiseta aparecia onde deveria estar o próprio usuário).
+- Custo alto para o pouco que rendeu.
+
+**Falha do meu lado no teste (registrar para não repetir):** no Caminho A a página mandava ao `lucy-2.5`
+só o texto do prompt, **sem a foto da peça** (o modelo aceita `reference_image`, mas não foi usado). Com a
+camiseta preta lisa da 2ª rodada, o texto bastava; com peça cheia de detalhe (logo SESI, faixas e bolsos
+da jaqueta) o modelo inventou a peça a partir da descrição. Ou seja: **a qualidade da roupa no Caminho A
+ficou subavaliada por causa da ferramenta de teste**. Já o fundo que não aparece e a peça duplicada são
+instabilidade do próprio modelo, e bastam para reprovar pelos critérios da seção 4.7.
+
+**Decisão do usuário (07/10/2026):** a troca de fundo por IA **sai do evento**. Usar **fundo físico
+neutro** no estande, como o CLAUDE.md prevê para o caso de não estar estável até 16/10. O código do teste
+(`web/app/teste-fundo/`, `hooks/useBackgroundReplace.ts`, `hooks/useDecartTestConnect.ts` e o download do
+`selfie_segmenter.tflite`) foi **apagado** — continua no histórico do git (commits `176a92b` e `72e071e`)
+se a Etapa 2 quiser retomar. A atualização do SDK para 0.2.5 **ficou**: o quiosque já roda nela e foi
+validado.
+
+**Para a Etapa 2, se a ideia de cenário voltar:**
+- Caminho B (VTON + fundo local) tem bordas boas, mas o VTON altera a cor de um fundo que já chega pronto.
+  Vale testar com fundo fotográfico (não só cor sólida) antes de descartar de vez.
+- Caminho A precisa ser testado de novo **mandando a foto da peça** como referência, antes de qualquer
+  conclusão sobre a qualidade da roupa.
+- Mesmo preço por segundo do VTON ($0,02/s), mas cada rodada de teste é gasto sem retorno até funcionar:
+  planejar testes curtos e com roteiro fechado.

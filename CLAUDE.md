@@ -137,6 +137,11 @@ volta a valer o item "gravação de vídeo dos visitantes" da seção 8 como for
 - Só entra no evento se estiver **estável até 16/10**. Caso contrário, use **fundo físico neutro** e registre isso em `docs/checklist-estande.md`.
 - Se aprovado, a interface é um seletor simples de cenários (ex: passarela, rua, vitrine), com opção "sem cenário" como padrão.
 
+**Decidido em 07/10/2026: REPROVADO, fora do evento.** Testados os caminhos B e A (fundo que não aparecia,
+peça duplicada, cor do fundo mudando com o movimento, custo alto). O estande usa fundo físico neutro
+(registrado em `docs/checklist-estande.md`). Código do teste apagado; resultados e o que refazer na Etapa 2
+estão em `docs/aprendizados.md`. Não retomar antes do evento sem pedido explícito do usuário.
+
 ---
 
 ## 5. Segurança
