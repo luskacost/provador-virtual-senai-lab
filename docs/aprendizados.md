@@ -345,3 +345,12 @@ validado.
   conclusão sobre a qualidade da roupa.
 - Mesmo preço por segundo do VTON ($0,02/s), mas cada rodada de teste é gasto sem retorno até funcionar:
   planejar testes curtos e com roteiro fechado.
+
+## Marca d'água no vídeo da Decart, 07/10/2026 — deixada como está
+
+O usuário notou uma marca d'água no vídeo ao vivo. Não é do nosso código (só desenhamos o logo do SENAI Lab
+Fashion na foto impressa). O changelog da Decart (maio/2026) cita "server-baked pixels (watermarks,
+overlays)": a marca é gravada pelo servidor deles nos pixels do vídeo gerado. Não há opção no
+`@decartai/sdk` 0.2.5 nem menção na documentação do VTON para removê-la. **Decisão do usuário: não remover.**
+Em aberto para a Etapa 2: se a marca depende do plano da conta (perguntar ao suporte da Decart) — não foi
+verificado se ela já aparecia com a chave antiga. Vale lembrar que a foto impressa também leva a marca.
