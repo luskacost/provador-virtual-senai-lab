@@ -11,8 +11,8 @@
       com as do evento. Marcar `"ativo": false` em `web/catalog/products.json` para qualquer peça que o
       modelo represente mal.
 - [ ] Validar com o usuário a redação final do aviso de LGPD (`web/components/IdleScreen.tsx`).
-- [ ] Decidir os valores finais de `SESSION_LIMIT_SECONDS` / `INACTIVITY_LIMIT_SECONDS` /
-      `COOLDOWN_SECONDS` (hoje estão em valores de teste — ver `docs/operacao-evento.md`).
+- [x] Valores de sessão decididos em 07/10/2026 e mantidos de forma permanente: 30 s de limite, 15 s de
+      inatividade, 10 s de pausa (ver `docs/operacao-evento.md`).
 - [ ] Testar numa rede diferente da de casa/trabalho (a rede do evento pode ter proxy/firewall diferente —
       ver o achado sobre diagnóstico de conexão em `docs/aprendizados.md`). A Decart ainda precisa de
       internet; só a foto não depende mais disso.

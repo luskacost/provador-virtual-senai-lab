@@ -56,8 +56,9 @@ const INACTIVITY_LIMIT_SECONDS = 15;   // sem trocar de peça por esse tempo, en
 const COOLDOWN_SECONDS = 10;           // pausa antes de reconectar a mesma pessoa
 ```
 
-**Esses são valores de teste** (o padrão do CLAUDE.md pede 90 s de limite). Decidir com o usuário os
-valores finais antes do evento — 30 s pode ser curto demais para alguém realmente escolher e ver a peça.
+**Valores definitivos, decididos em 07/10/2026** (em vez dos 90 s do padrão original): suficientes para o
+visitante experimentar e economizam créditos da Decart. Se no evento o ritmo pedir ajuste, é só mudar as
+constantes acima e refazer o build — mas não é uma pendência.
 
 ## Métricas
 
