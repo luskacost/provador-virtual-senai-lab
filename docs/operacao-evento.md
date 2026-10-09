@@ -19,7 +19,12 @@
    `chrome --kiosk http://localhost:3000`) para esconder a barra de endereço e impedir que o visitante
    navegue para outro lugar.
 5. Autorize a câmera quando o navegador perguntar (só pergunta na primeira vez por perfil de navegador).
-6. Confirme que há uma **impressora configurada como padrão** no Windows, com papel. O botão "Tirar foto"
+6. **Impressora (Fujifilm ASK-300): use o perfil "FUJIFILM ASK-300 (Copiar 1)"**, na porta USB002, e deixe
+   ele como padrão. O perfil sem "(Copiar 1)" (porta USB001) é o da primeira instalação e não imprimiu;
+   se o Windows trocar a padrão sozinho, volte para o "(Copiar 1)". Se a impressora ficar em "Erro" com a
+   luz "Paper/Ribbon" laranja, confira se papel e fita são do **mesmo kit/tamanho**, cancele os
+   trabalhos parados na fila e tente de novo.
+   Confirme que há uma **impressora configurada como padrão** no Windows, com papel. O botão "Tirar foto"
    abre o diálogo de impressão do navegador — teste uma vez antes do evento para garantir que a impressora
    certa está selecionada e que o diálogo não fica pedindo confirmação demais (ver "Se algo der errado").
 

@@ -16,8 +16,10 @@
 - [ ] Testar numa rede diferente da de casa/trabalho (a rede do evento pode ter proxy/firewall diferente —
       ver o achado sobre diagnóstico de conexão em `docs/aprendizados.md`). A Decart ainda precisa de
       internet; só a foto não depende mais disso.
-- [ ] Testar a impressão da foto (botão "Tirar foto" → "Imprimir") com a impressora que vai estar no
-      evento, já com o papel certo.
+- [x] Impressora Fujifilm ASK-300 instalada e imprimindo (09/10/2026), pelo perfil **"FUJIFILM ASK-300
+      (Copiar 1)"**, que é o padrão. Falta só um teste pelo app (botão "Tirar foto" → "Imprimir").
+- [ ] Desativar "Permitir que o Windows gerencie minha impressora padrão" (Configurações → Impressoras e
+      scanners), para o Windows não trocar a padrão sozinho.
 - [ ] Confirmar que `DECART_API_KEY` tem saldo/limite suficiente para o dia (checar o painel da Decart).
 - [x] Decidir a resposta para a seção 4.7 (cenário de fundo): **decidido em 07/10/2026 — troca de fundo
       por IA fica FORA do evento** (testada e reprovada: fundo que não aparece, peça duplicada, custo alto;
