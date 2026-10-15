@@ -18,6 +18,10 @@ interface PersonDetectionViewProps {
   sessionSecondsLeft?: number | null;
   /** true durante o resfriamento pós-encerramento forçado (limite, inatividade, operador). */
   cooling?: boolean;
+  /** true depois de "tirar a peça": mostra a câmera sem a IA, mesmo com a conexão ainda aberta. */
+  showOriginal?: boolean;
+  /** Conteúdo extra por cima do vídeo (legenda dos gestos). */
+  overlay?: React.ReactNode;
 }
 
 function getDetectionLabel(
@@ -82,6 +86,8 @@ export function PersonDetectionView({
   onLocalVideo,
   sessionSecondsLeft = null,
   cooling = false,
+  showOriginal = false,
+  overlay,
 }: PersonDetectionViewProps) {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -100,7 +106,7 @@ export function PersonDetectionView({
     onLocalVideo?.(localVideoRef);
   }, [onLocalVideo]);
 
-  const isGenerating = status === "generating";
+  const isGenerating = status === "generating" && !showOriginal;
   const label = getDetectionLabel(detectionReady, personPresent, status);
   const friendlyError = friendlyErrorMessage(error);
 
@@ -153,7 +159,9 @@ export function PersonDetectionView({
       </div>
 
       {/* Tirar foto / gravar vídeo (a pedido do usuário) - efêmero, ver hooks/useCapture.ts */}
-      <CaptureControls videoRef={remoteVideoRef} visible={status === "generating"} />
+      <CaptureControls videoRef={remoteVideoRef} visible={isGenerating} />
+
+      {overlay}
 
       {friendlyError && (
         <div className="absolute bottom-6 left-6 right-6 z-40 flex items-center justify-between gap-4 rounded-xl bg-red-600/90 px-6 py-4 text-white">

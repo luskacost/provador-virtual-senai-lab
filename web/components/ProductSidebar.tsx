@@ -1,17 +1,27 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { PRODUCTS, Product } from "@/lib/catalog";
 import Image from "next/image";
 
 interface ProductSidebarProps {
   activeProduct: Product | null;
   onSelectProduct: (product: Product) => void;
+  /** Peça em foco para a navegação por gestos/teclado (anel branco); null = sem sessão ativa. */
+  focusedProductId?: string | null;
 }
 
 export function ProductSidebar({
   activeProduct,
   onSelectProduct,
+  focusedProductId = null,
 }: ProductSidebarProps) {
+  const focusedRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    focusedRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [focusedProductId]);
+
   return (
     <aside className="w-[26rem] shrink-0 border-r border-gray-800 bg-brand-navy-dark flex flex-col portrait:w-full portrait:h-[38vh] portrait:border-r-0 portrait:border-t">
       <div className="p-6 border-b border-gray-800 portrait:flex portrait:items-center portrait:gap-6 portrait:py-4">
@@ -34,11 +44,14 @@ export function ProductSidebar({
           {PRODUCTS.map((product) => (
             <button
               key={product.id}
+              ref={focusedProductId === product.id ? focusedRef : undefined}
               onClick={() => onSelectProduct(product)}
               className={`text-left rounded-xl overflow-hidden border-4 transition-all ${
                 activeProduct?.id === product.id
                   ? "border-brand-orange ring-4 ring-brand-orange/30"
-                  : "border-gray-700 hover:border-gray-500"
+                  : focusedProductId === product.id
+                    ? "border-white ring-4 ring-white/50"
+                    : "border-gray-700 hover:border-gray-500"
               }`}
             >
               <div className="relative aspect-square bg-white">

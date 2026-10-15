@@ -354,3 +354,20 @@ overlays)": a marca é gravada pelo servidor deles nos pixels do vídeo gerado. 
 `@decartai/sdk` 0.2.5 nem menção na documentação do VTON para removê-la. **Decisão do usuário: não remover.**
 Em aberto para a Etapa 2: se a marca depende do plano da conta (perguntar ao suporte da Decart) — não foi
 verificado se ela já aparecia com a chave antiga. Vale lembrar que a foto impressa também leva a marca.
+
+## Gestos para escolher/tirar peça sem tocar na TV, 15/10/2026
+
+Pedido do usuário: o visitante fica a 1,5–2 m da TV e não depende do operador para escolher peça. Feito com
+a pose do MediaPipe que já detecta presença (local, sem custo na Decart): mão direita/esquerda levantada =
+próxima/anterior, duas mãos acima da cabeça por 1,5 s = escolher; com peça escolhida, esse mesmo gesto é a
+**única** opção e tira a peça (evita troca por engano). Setas + Enter + Backspace como reserva.
+
+- Lógica pura em `web/lib/gesture-engine.ts`, testada com 12 cenários de poses simuladas (repetição,
+  tempo mínimo, "soltar antes de repetir", pulso fora do quadro, modo vestindo ignora mão única).
+  **Não testada com pessoa real** — depende de enquadramento da Canon e da distância; ver checklist.
+- Durante a sessão a leitura da pose sobe de 1 para ~8 por segundo (precisa para gestos); em espera
+  continua 1 por segundo. O tempo para considerar "pessoa saiu" segue em 3 s.
+- "Tirar a peça" só esconde a IA na tela (volta a câmera crua). O SDK tem `setImage(null)`, mas não
+  verifiquei o que o modelo faz com o prompt antigo, e testar gasta crédito; o limite de 30 s já
+  controla o custo. Para a Etapa 2: testar `set({ prompt, image: null })` de verdade.
+- Interruptor: `GESTURES_ENABLED` em `web/app/page.tsx`.
