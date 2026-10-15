@@ -371,3 +371,8 @@ próxima/anterior, duas mãos acima da cabeça por 1,5 s = escolher; com peça e
   verifiquei o que o modelo faz com o prompt antigo, e testar gasta crédito; o limite de 30 s já
   controla o custo. Para a Etapa 2: testar `set({ prompt, image: null })` de verdade.
 - Interruptor: `GESTURES_ENABLED` em `web/app/page.tsx`.
+
+**Atualização 15/10/2026: gestos retirados a pedido do usuário.** Ficou só a navegação por teclado
+(setas, Enter, Backspace/Delete), para não depender do mouse. A detecção de presença voltou a 1 leitura por
+segundo. O código dos gestos (lógica testada com poses simuladas) continua no histórico do git, commit
+`ad7dfc5`, se a Etapa 2 quiser retomar.

@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Product, PRODUCTS } from "@/lib/catalog";
-import { createGestureEngine, GestureOutput, PoseSample } from "@/lib/gesture-engine";
-import { GestureOverlay } from "@/components/GestureOverlay";
 import { useCamera } from "@/hooks/useCamera";
 import { useDecartRealtime } from "@/hooks/useDecartRealtime";
 import { usePersonDetection } from "@/hooks/usePersonDetection";
@@ -18,10 +16,6 @@ import { PersonDetectionView } from "@/components/PersonDetectionView";
 const SESSION_LIMIT_SECONDS = 30;
 const INACTIVITY_LIMIT_SECONDS = 15;
 const COOLDOWN_SECONDS = 10;
-
-// Escolher/tirar peça por gestos (mão levantada) sem tocar na TV. Setas + Enter funcionam sempre; se os
-// gestos derem problema no evento, é só trocar para false e refazer o build.
-const GESTURES_ENABLED = true;
 
 export default function PersonDetectionPage() {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
@@ -58,14 +52,9 @@ export default function PersonDetectionPage() {
     });
   }, []);
 
-  // Navegação por gestos/teclado: peça em foco, "tirar a peça" (só some a IA da tela, a conexão segue) e o
-  // progresso do gesto em andamento. A leitura da pose é feita em usePersonDetection, declarado abaixo do
-  // timer (precisa saber se há sessão ativa para ler mais vezes por segundo).
+  // Navegação por teclado (sem mouse): peça em foco e "tirar a peça" (só some a IA da tela, a conexão segue).
   const [focusIndex, setFocusIndex] = useState(0);
   const [showOriginal, setShowOriginal] = useState(false);
-  const [gestureHold, setGestureHold] = useState<GestureOutput["hold"]>(null);
-  const gestureEngineRef = useRef(createGestureEngine());
-  const poseHandlerRef = useRef<(pose: PoseSample | null, now: number) => void>(() => {});
 
   // Encerramento forçado (limite de tempo, inatividade, aba escondida, atalho do operador): larga a
   // conexão da Decart e limpa a peça selecionada. O cooldown do hook impede a mesma pessoa ser
@@ -91,10 +80,7 @@ export default function PersonDetectionPage() {
   });
 
   const sessionActive = timer.secondsLeft != null;
-  const { personPresent, isReady: detectionReady } = usePersonDetection(localVideoElement, {
-    fast: GESTURES_ENABLED && sessionActive,
-    onPose: (pose, now) => poseHandlerRef.current(pose, now),
-  });
+  const { personPresent, isReady: detectionReady } = usePersonDetection(localVideoElement);
 
   const handleRemoteStreamRef = useCallback(
     (ref: React.RefObject<HTMLVideoElement | null>) => {
@@ -250,28 +236,7 @@ export default function PersonDetectionPage() {
     [timer]
   );
 
-  // Gestos: só valem com sessão ativa e conexão aberta. O modo muda conforme há ou não peça escolhida.
-  useEffect(() => {
-    poseHandlerRef.current = (pose, now) => {
-      const engine = gestureEngineRef.current;
-      const mode = activeProduct ? "wearing" : "browsing";
-      if (!GESTURES_ENABLED || !sessionActive || !clientRef.current) {
-        engine.update(null, now, mode); // zera qualquer gesto em andamento
-        setGestureHold(null);
-        return;
-      }
-      const out = engine.update(pose, now, mode);
-      setGestureHold(out.hold);
-      if (out.event === "next") stepFocus(1);
-      else if (out.event === "prev") stepFocus(-1);
-      else if (out.event === "select") {
-        const product = PRODUCTS[focusIndex];
-        if (product) handleSelectProduct(product);
-      } else if (out.event === "remove") handleRemoveProduct();
-    };
-  }, [activeProduct, sessionActive, clientRef, focusIndex, stepFocus, handleSelectProduct, handleRemoveProduct]);
-
-  // Teclado (reserva dos gestos e para o operador): setas escolhem, Enter aplica, Backspace/Delete tira.
+  // Teclado (sem precisar do mouse): setas escolhem, Enter aplica, Backspace/Delete tira a peça.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.ctrlKey || e.altKey || e.metaKey) return; // não atrapalha os atalhos do operador
@@ -315,15 +280,6 @@ export default function PersonDetectionPage() {
         sessionSecondsLeft={timer.secondsLeft}
         cooling={timer.cooling}
         showOriginal={showOriginal}
-        overlay={
-          GESTURES_ENABLED && sessionActive && status === "generating" ? (
-            <GestureOverlay
-              mode={activeProduct ? "wearing" : "browsing"}
-              hold={gestureHold}
-              focusedName={focusedProduct?.nome ?? null}
-            />
-          ) : null
-        }
       />
     </div>
   );

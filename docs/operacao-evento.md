@@ -28,23 +28,18 @@
    abre o diálogo de impressão do navegador — teste uma vez antes do evento para garantir que a impressora
    certa está selecionada e que o diálogo não fica pedindo confirmação demais (ver "Se algo der errado").
 
-## Como o visitante escolhe a peça sem tocar na TV (gestos e teclado)
+## Escolher a peça pelo teclado (sem mouse)
 
-Durante a sessão, a legenda aparece na parte de baixo do vídeo. A peça "em foco" tem um anel branco no catálogo.
+Durante a sessão, a peça "em foco" tem um anel branco no catálogo.
 
-| Gesto do visitante | O que faz |
+| Tecla | O que faz |
 |---|---|
-| Mão **direita** levantada acima do ombro | Próxima peça (repete enquanto segurar) |
-| Mão **esquerda** levantada acima do ombro | Peça anterior |
-| **Duas mãos acima da cabeça** por 1,5 s | Escolhe a peça em foco |
-| Com peça escolhida: duas mãos acima da cabeça por 1,5 s | **Tira a peça** (única opção enquanto veste, para não trocar por engano) |
+| **Setas** | Movem o foco para a próxima/anterior peça |
+| **Enter** | Veste a peça em foco |
+| **Backspace** ou **Delete** | Tira a peça (volta a mostrar a câmera sem a IA) |
 
-Reserva e uso do operador, com o teclado: **setas** movem o foco, **Enter** escolhe, **Backspace** ou
-**Delete** tira a peça. Tocar/clicar na peça continua funcionando.
-
-"Tirar a peça" só esconde a IA e mostra a câmera crua; a conexão com a Decart continua até o fim da sessão
-(o limite de 30 s controla o custo). Para desligar os gestos no evento, mude `GESTURES_ENABLED` para `false`
-em `web/app/page.tsx` e refaça o build (setas e Enter continuam).
+Tocar/clicar na peça continua funcionando. "Tirar a peça" só esconde a IA na tela; a conexão com a Decart
+continua até o fim da sessão (o limite de 30 s controla o custo).
 
 ## Atalhos do operador
 

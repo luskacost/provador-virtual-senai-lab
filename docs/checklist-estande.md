@@ -24,10 +24,8 @@
 - [x] Decidir a resposta para a seção 4.7 (cenário de fundo): **decidido em 07/10/2026 — troca de fundo
       por IA fica FORA do evento** (testada e reprovada: fundo que não aparece, peça duplicada, custo alto;
       ver `docs/aprendizados.md`). O estande usa **fundo físico neutro**.
-- [ ] **Testar os gestos ao vivo** (nunca testados com pessoa real — só a lógica foi testada com poses
-      simuladas): mão direita/esquerda trocam o foco, duas mãos acima da cabeça escolhem e depois tiram a
-      peça. Conferir a distância do visitante (1,5–2 m) e se os punhos aparecem no quadro da Canon. Se
-      disparar sem querer ou falhar, desligar com `GESTURES_ENABLED = false` e usar as setas.
+- [ ] Deixar um teclado (ou controle sem fio com setas e Enter) ao alcance de quem opera o estande e
+      testar: setas movem o anel branco, Enter veste, Backspace tira a peça.
 - [ ] Montar/confirmar o fundo físico neutro do estande (liso, sem estampa, sem objetos atrás da pessoa).
 
 ## Na véspera

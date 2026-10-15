@@ -7,7 +7,7 @@ import Image from "next/image";
 interface ProductSidebarProps {
   activeProduct: Product | null;
   onSelectProduct: (product: Product) => void;
-  /** Peça em foco para a navegação por gestos/teclado (anel branco); null = sem sessão ativa. */
+  /** Peça em foco para a navegação por teclado (anel branco); null = sem sessão ativa. */
   focusedProductId?: string | null;
 }
 
