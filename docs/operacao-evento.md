@@ -39,7 +39,7 @@ Durante a sessão, a peça "em foco" tem um anel branco no catálogo.
 | **Backspace** ou **Delete** | Tira a peça (volta a mostrar a câmera sem a IA) |
 
 Tocar/clicar na peça continua funcionando. "Tirar a peça" só esconde a IA na tela; a conexão com a Decart
-continua até o fim da sessão (o limite de 30 s controla o custo).
+continua até o fim da sessão (o limite de 50 s controla o custo).
 
 ## Atalhos do operador
 
@@ -69,7 +69,7 @@ terminal (`Ctrl+C`) e repita "Como ligar".
 ## Valores da sessão (CLAUDE.md 4.3) — constantes em `web/app/page.tsx`
 
 ```ts
-const SESSION_LIMIT_SECONDS = 30;      // limite total por visitante
+const SESSION_LIMIT_SECONDS = 50;      // limite total por visitante
 const INACTIVITY_LIMIT_SECONDS = 15;   // sem trocar de peça por esse tempo, encerra
 const COOLDOWN_SECONDS = 10;           // pausa antes de reconectar a mesma pessoa
 ```

@@ -13,7 +13,7 @@ import { PersonDetectionView } from "@/components/PersonDetectionView";
 
 // CLAUDE.md 4.3 - configurável. O padrão do documento é 90s, mas o usuário decidiu em 07/10/2026 manter
 // estes valores de forma permanente (suficiente para o visitante e economiza créditos da Decart).
-const SESSION_LIMIT_SECONDS = 30;
+const SESSION_LIMIT_SECONDS = 50;
 const INACTIVITY_LIMIT_SECONDS = 15;
 const COOLDOWN_SECONDS = 10;
 

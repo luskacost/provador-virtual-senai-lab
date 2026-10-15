@@ -11,7 +11,7 @@
       com as do evento. Marcar `"ativo": false` em `web/catalog/products.json` para qualquer peça que o
       modelo represente mal.
 - [ ] Validar com o usuário a redação final do aviso de LGPD (`web/components/IdleScreen.tsx`).
-- [x] Valores de sessão decididos em 07/10/2026 e mantidos de forma permanente: 30 s de limite, 15 s de
+- [x] Valores de sessão decididos em 07/10/2026 e mantidos de forma permanente (limite subiu de 30 para 50 s em 15/10): 50 s de limite, 15 s de
       inatividade, 10 s de pausa (ver `docs/operacao-evento.md`).
 - [ ] Testar numa rede diferente da de casa/trabalho (a rede do evento pode ter proxy/firewall diferente —
       ver o achado sobre diagnóstico de conexão em `docs/aprendizados.md`). A Decart ainda precisa de
