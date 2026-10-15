@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useCapture } from "@/hooks/useCapture";
 import { printImage } from "@/lib/print-image";
 
@@ -13,6 +14,34 @@ interface CaptureControlsProps {
 // hooks/useCapture.ts e lib/print-image.ts).
 export function CaptureControls({ videoRef, visible }: CaptureControlsProps) {
   const cap = useCapture(videoRef);
+  const { state, photoDataUrl, takePhoto, dismiss } = cap;
+
+  // Teclado: F tira a foto; com a prévia aberta, Enter imprime e Backspace/Esc fecha. Enquanto a prévia (ou
+  // o erro) está aberta, as outras teclas são engolidas — senão setas/Enter também mexeriam na peça que
+  // está por trás. Escuta na fase de captura para rodar antes do teclado do catálogo (app/page.tsx).
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.ctrlKey || e.altKey || e.metaKey) return; // deixa os atalhos do operador (Ctrl+Shift+...)
+      const key = e.key.toLowerCase();
+
+      if (state === "idle") {
+        if (key === "f" && visible && !e.repeat) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          takePhoto();
+        }
+        return;
+      }
+
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (e.repeat) return;
+      if (state === "pronto" && photoDataUrl && key === "enter") printImage(photoDataUrl);
+      else if (key === "backspace" || key === "escape" || key === "delete") dismiss();
+    }
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [state, visible, photoDataUrl, takePhoto, dismiss]);
 
   if (!visible && cap.state === "idle") return null;
 

@@ -38,6 +38,11 @@ Durante a sessão, a peça "em foco" tem um anel branco no catálogo.
 | **Enter** | Veste a peça em foco |
 | **Backspace** ou **Delete** | Tira a peça (volta a mostrar a câmera sem a IA) |
 
+| **F** | Tira a foto (só aparece com peça ao vivo, igual ao botão "Tirar foto") |
+| Com a prévia da foto aberta: **Enter** | Imprime |
+| Com a prévia aberta: **Backspace**, **Delete** ou **Esc** | Fecha a prévia |
+
+Com a prévia aberta, as outras teclas ficam travadas, para não mexer na peça que está por trás.
 Tocar/clicar na peça continua funcionando. "Tirar a peça" só esconde a IA na tela; a conexão com a Decart
 continua até o fim da sessão (o limite de 50 s controla o custo).
 
