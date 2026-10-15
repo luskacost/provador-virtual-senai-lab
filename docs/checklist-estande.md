@@ -7,26 +7,26 @@
 
 - [ ] Todas as peças do catálogo são reais, sem marca d'água, sem logo de loja, sem imagem gerada por IA
       (ver `docs/aprendizados.md` — critério que usamos para recusar fotos).
-- [ ] Testar cada peça do catálogo pelo menos uma vez com uma pessoa de verdade, em condições parecidas
-      com as do evento. Marcar `"ativo": false` em `web/catalog/products.json` para qualquer peça que o
+- [x] Testar cada peça do catálogo pelo menos uma vez com uma pessoa de verdade (feito pelo usuário em
+      15/10/2026, incluindo luvas, capacete e óculos), em condições parecidas com as do evento. Marcar `"ativo": false` em `web/catalog/products.json` para qualquer peça que o
       modelo represente mal.
 - [ ] Validar com o usuário a redação final do aviso de LGPD (`web/components/IdleScreen.tsx`).
 - [x] Valores de sessão decididos em 07/10/2026 e mantidos de forma permanente (limite subiu de 30 para 50 s em 15/10): 50 s de limite, 15 s de
       inatividade, 10 s de pausa (ver `docs/operacao-evento.md`).
-- [ ] Testar numa rede diferente da de casa/trabalho (a rede do evento pode ter proxy/firewall diferente —
+- [x] (feito em 15/10/2026) Testar numa rede diferente da de casa/trabalho (a rede do evento pode ter proxy/firewall diferente —
       ver o achado sobre diagnóstico de conexão em `docs/aprendizados.md`). A Decart ainda precisa de
       internet; só a foto não depende mais disso.
 - [x] Impressora Fujifilm ASK-300 instalada e imprimindo (09/10/2026), pelo perfil **"FUJIFILM ASK-300
-      (Copiar 1)"**, que é o padrão. Falta só um teste pelo app (botão "Tirar foto" → "Imprimir").
+      (Copiar 1)"**, que é o padrão. Teste pelo app (F → Enter) feito em 15/10/2026.
 - [ ] Desativar "Permitir que o Windows gerencie minha impressora padrão" (Configurações → Impressoras e
       scanners), para o Windows não trocar a padrão sozinho.
-- [ ] Confirmar que `DECART_API_KEY` tem saldo/limite suficiente para o dia (checar o painel da Decart).
+- [x] Saldo da chave carregado em 15/10/2026. Conferir o saldo no painel da Decart nocomeço de cada dia do evento.
 - [x] Decidir a resposta para a seção 4.7 (cenário de fundo): **decidido em 07/10/2026 — troca de fundo
       por IA fica FORA do evento** (testada e reprovada: fundo que não aparece, peça duplicada, custo alto;
       ver `docs/aprendizados.md`). O estande usa **fundo físico neutro**.
-- [ ] Deixar um teclado (ou controle sem fio com setas e Enter) ao alcance de quem opera o estande e
-      testar: setas movem o anel branco, Enter veste, Backspace tira a peça.
-- [ ] Montar/confirmar o fundo físico neutro do estande (liso, sem estampa, sem objetos atrás da pessoa).
+- [x] Teclado: setas movem o anel branco, Enter veste, Backspace tira a peça, F tira a foto (testado em
+      15/10/2026). Deixar um teclado ou controle sem fio ao alcance de quem opera.
+- [x] Fundo físico neutro do estande montado (liso, sem estampa, sem objetos atrás da pessoa).
 
 ## Na véspera
 
