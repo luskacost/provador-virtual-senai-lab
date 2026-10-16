@@ -10,6 +10,7 @@ import { SessionEndReason } from "@/lib/metrics";
 import { urlToImageBlob, resizeImageBlob } from "@/lib/image-utils";
 import { ProductSidebar } from "@/components/ProductSidebar";
 import { PersonDetectionView } from "@/components/PersonDetectionView";
+import { StandbyScreen } from "@/components/StandbyScreen";
 
 // CLAUDE.md 4.3 - configurável. O padrão do documento é 90s, mas o usuário decidiu em 07/10/2026 manter
 // estes valores de forma permanente (suficiente para o visitante e economiza créditos da Decart).
@@ -56,6 +57,11 @@ export default function PersonDetectionPage() {
   const [focusIndex, setFocusIndex] = useState(0);
   const [showOriginal, setShowOriginal] = useState(false);
 
+  // Standby do operador (Ctrl+Shift+S): câmera desligada, detecção pausada, nada conecta na Decart e a tela
+  // mostra só o logo. standbyRef deixa a conexão que estiver "em andamento" saber que deve se desfazer.
+  const [standby, setStandby] = useState(false);
+  const standbyRef = useRef(false);
+
   // Encerramento forçado (limite de tempo, inatividade, aba escondida, atalho do operador): larga a
   // conexão da Decart e limpa a peça selecionada. O cooldown do hook impede a mesma pessoa ser
   // reconectada na hora pela detecção de presença (senão o limite não teria efeito nenhum).
@@ -80,7 +86,18 @@ export default function PersonDetectionPage() {
   });
 
   const sessionActive = timer.secondsLeft != null;
-  const { personPresent, isReady: detectionReady } = usePersonDetection(localVideoElement);
+  // Em standby a detecção para (vídeo null) e o hook zera "pessoa presente" — assim, ao acordar, não conecta
+  // na Decart por causa de uma detecção velha.
+  const { personPresent, isReady: detectionReady } = usePersonDetection(
+    standby ? null : localVideoElement
+  );
+
+  const toggleStandby = useCallback(() => {
+    const entering = !standbyRef.current;
+    standbyRef.current = entering;
+    if (entering) timer.forceEnd("operador"); // encerra e registra a sessão em andamento, se houver
+    setStandby(entering);
+  }, [timer]);
 
   const handleRemoteStreamRef = useCallback(
     (ref: React.RefObject<HTMLVideoElement | null>) => {
@@ -96,17 +113,18 @@ export default function PersonDetectionPage() {
     []
   );
 
-  // Start camera on mount (detection runs on the camera feed, Decart connects later)
+  // Câmera ligada (a detecção roda na imagem dela; a Decart conecta depois). Em standby, desliga a câmera.
   useEffect(() => {
+    if (standby) return;
     startCamera();
     return () => {
       stopCamera();
     };
-  }, [startCamera, stopCamera]);
+  }, [standby, startCamera, stopCamera]);
 
   // Connect/disconnect based on person detection
   useEffect(() => {
-    if (!detectionReady || !stream) return;
+    if (standby || !detectionReady || !stream) return;
 
     if (
       personPresent &&
@@ -133,6 +151,12 @@ export default function PersonDetectionPage() {
 
         connectingRef.current = false;
 
+        if (rtClient && standbyRef.current) {
+          // o operador entrou em standby enquanto a conexão abria: desfaz sem abrir sessão
+          disconnect();
+          return;
+        }
+
         if (rtClient) {
           timer.start(); // CLAUDE.md 4.3: sessão começa a contar aqui, não no clique da primeira peça
           sessionStartedAtRef.current = new Date().toISOString(); // CLAUDE.md 4.5
@@ -154,11 +178,11 @@ export default function PersonDetectionPage() {
       disconnect();
       timer.stop();
     }
-  }, [personPresent, detectionReady, stream, connect, disconnect, clientRef, timer, logSession]);
+  }, [standby, personPresent, detectionReady, stream, connect, disconnect, clientRef, timer, logSession]);
 
   // Atalhos do operador (CLAUDE.md 4.3): Ctrl+Shift+E encerra a sessão atual agora; Ctrl+Shift+R
   // reseta o app inteiro (mesmo caminho do botão "Tentar de novo" de erro: recarregar é o reset mais
-  // confiável). Combinação improvável de alguém apertar por acidente.
+  // confiável); Ctrl+Shift+S liga/desliga o standby. Combinações improváveis de alguém apertar por acidente.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!e.ctrlKey || !e.shiftKey) return;
@@ -169,11 +193,14 @@ export default function PersonDetectionPage() {
       } else if (key === "r") {
         e.preventDefault();
         window.location.reload();
+      } else if (key === "s") {
+        e.preventDefault(); // alguns navegadores usam Ctrl+Shift+S para captura de tela
+        if (!e.repeat) toggleStandby();
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [timer]);
+  }, [timer, toggleStandby]);
 
   // Encerra se a aba/janela perder o foco (CLAUDE.md 4.3: "ao trocar de aba") — evita gastar sessão com
   // ninguém olhando.
@@ -240,6 +267,7 @@ export default function PersonDetectionPage() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.ctrlKey || e.altKey || e.metaKey) return; // não atrapalha os atalhos do operador
+      if (standbyRef.current) return; // em standby, só o atalho de acordar vale
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
         stepFocus(1);
@@ -281,6 +309,7 @@ export default function PersonDetectionPage() {
         cooling={timer.cooling}
         showOriginal={showOriginal}
       />
+      {standby && <StandbyScreen />}
     </div>
   );
 }

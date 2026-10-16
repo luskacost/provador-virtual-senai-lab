@@ -50,7 +50,14 @@ export function usePersonDetection(
 
   // Poll video for person detection
   useEffect(() => {
-    if (!isReady || !videoElement) return;
+    if (!videoElement) {
+      // Pausado (standby do operador): ninguém "presente" até voltar a olhar o vídeo, senão uma detecção
+      // velha conectaria na Decart ao acordar.
+      missCountRef.current = 0;
+      setPersonPresent(false);
+      return;
+    }
+    if (!isReady) return;
 
     function detect() {
       if (
