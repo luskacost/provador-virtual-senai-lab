@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-// Tela de standby (Ctrl+Shift+S): cobre tudo, só o logo, fundo preto (não gasta nada e poupa a TV ligada o
+// Tela de standby (Shift+S): cobre tudo, só o logo, fundo preto (não gasta nada e poupa a TV ligada o
 // dia todo). O logo tem "FASHION" em preto, por isso fica numa placa branca, como nas outras telas.
 export function StandbyScreen() {
   return (

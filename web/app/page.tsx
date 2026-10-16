@@ -57,7 +57,7 @@ export default function PersonDetectionPage() {
   const [focusIndex, setFocusIndex] = useState(0);
   const [showOriginal, setShowOriginal] = useState(false);
 
-  // Standby do operador (Ctrl+Shift+S): câmera desligada, detecção pausada, nada conecta na Decart e a tela
+  // Standby do operador (Shift+S): câmera desligada, detecção pausada, nada conecta na Decart e a tela
   // mostra só o logo. standbyRef deixa a conexão que estiver "em andamento" saber que deve se desfazer.
   const [standby, setStandby] = useState(false);
   const standbyRef = useRef(false);
