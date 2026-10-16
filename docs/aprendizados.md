@@ -376,3 +376,31 @@ próxima/anterior, duas mãos acima da cabeça por 1,5 s = escolher; com peça e
 (setas, Enter, Backspace/Delete), para não depender do mouse. A detecção de presença voltou a 1 leitura por
 segundo. O código dos gestos (lógica testada com poses simuladas) continua no histórico do git, commit
 `ad7dfc5`, se a Etapa 2 quiser retomar.
+
+## Lote de 16/10/2026 — 17 fotos de jaquetas/blazers (7 entraram, 10 ficaram de fora)
+
+Pedido do usuário: mais looks, de preferência com cores quentes. Mesma vetagem de sempre, mais um critério
+novo (rosto de modelo inteiro). Estas fotos **não foram testadas antes no Anywear** — prioridade de teste.
+
+**Adicionadas (7), todas na categoria `top`:**
+- `jaqueta-workwear-verde`, `blazer-acinturado-roxo`, `jaqueta-couro-envelhecido-azul` — fotos só da peça.
+  As duas primeiras tinham 475 px de largura (abaixo do mínimo de 512 do guia) e foram **ampliadas em 20%**
+  (suavizado); a imagem original continua nas imagens da conversa.
+- `jaqueta-jeans-quatro-bolsos-azul-marinho`, `jaqueta-chore-marrom`, `blazer-principe-de-gales-marrom`,
+  `jaqueta-bomber-couro-caramelo` — **fotos com modelo vestindo** (recortadas no rosto/boca), fora do padrão
+  "peça sozinha" da seção 4.1. Risco: o VTON pode confundir a calça, o colar ou a camisa da foto com a peça.
+  Se algum desses der problema nos testes, desativar com `"ativo": false`.
+
+**Recusadas (10):**
+- **Marca d'água/texto:** blazer de tweed cinza com "Stay Classic" escrito na foto; blazer de veludo marrom
+  com texto cortado no canto ("AI...").
+- **Logo visível:** camisa de pelo marrom com o logo da Loewe no cabide.
+- **Parecem geradas por IA** (texturas borradas, estampas tipo monograma de grife inexistentes; as 4 têm o
+  mesmo fundo cinza): blazer verde-oliva, jaqueta mostarda, jaqueta jeans azul-marinho e jaqueta jeans
+  preta com punhos de oncinha. Só entram se o usuário confirmar que quer mesmo assim.
+- **Rosto de modelo inteiro, foto de catálogo de loja:** jaqueta jeans lavada, jaqueta de linho azul e
+  jaqueta bege de linho. Novo critério: o catálogo aparece na TV para o público, e rosto identificável de
+  terceiros é risco de direito de imagem, além de atrapalhar o VTON.
+
+**Cores quentes:** entraram bomber caramelo, jaqueta chore marrom e blazer príncipe de gales marrom. Ainda
+faltam laranja, vermelho, amarelo e terracota de verdade — a maioria das fotos desse tom foi recusada.
