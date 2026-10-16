@@ -52,7 +52,7 @@ continua até o fim da sessão (o limite de 50 s controla o custo).
 |---|---|
 | `Ctrl+Shift+E` | Encerra a sessão atual imediatamente (libera para o próximo visitante) |
 | `Ctrl+Shift+R` | Reseta o app inteiro (recarrega a página — mesmo efeito do botão "Tentar de novo" de erro) |
-| `Ctrl+Shift+S` | **Liga/desliga o standby.** Em standby: encerra a sessão em andamento, desliga a câmera (a Canon descansa), pausa a detecção, nada conecta na Decart (custo zero) e a tela fica preta só com o logo. Apertar de novo acorda: religa a câmera (1–2 s) e o quiosque volta ao normal |
+| `Shift+S` | **Liga/desliga o standby** (não usa Ctrl: `Ctrl+Shift+S` é capturado pelo Windows). Em standby: encerra a sessão em andamento, desliga a câmera (a Canon descansa), pausa a detecção, nada conecta na Decart (custo zero) e a tela fica preta só com o logo. Apertar de novo acorda: religa a câmera (1–2 s) e o quiosque volta ao normal |
 | `Esc` (do navegador) | Sai do modo tela cheia, se precisar acessar o terminal |
 
 Esses atalhos exigem um teclado conectado ao quiosque (não aparecem na tela, de propósito — são para o

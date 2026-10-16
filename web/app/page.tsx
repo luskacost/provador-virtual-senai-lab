@@ -182,7 +182,8 @@ export default function PersonDetectionPage() {
 
   // Atalhos do operador (CLAUDE.md 4.3): Ctrl+Shift+E encerra a sessão atual agora; Ctrl+Shift+R
   // reseta o app inteiro (mesmo caminho do botão "Tentar de novo" de erro: recarregar é o reset mais
-  // confiável); Ctrl+Shift+S liga/desliga o standby. Combinações improváveis de alguém apertar por acidente.
+  // confiável). Combinações improváveis de alguém apertar por acidente. (O standby é Shift+S, mais abaixo:
+  // Ctrl+Shift+S é capturado pelo Windows e a página não consegue bloquear.)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!e.ctrlKey || !e.shiftKey) return;
@@ -193,14 +194,11 @@ export default function PersonDetectionPage() {
       } else if (key === "r") {
         e.preventDefault();
         window.location.reload();
-      } else if (key === "s") {
-        e.preventDefault(); // alguns navegadores usam Ctrl+Shift+S para captura de tela
-        if (!e.repeat) toggleStandby();
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [timer, toggleStandby]);
+  }, [timer]);
 
   // Encerra se a aba/janela perder o foco (CLAUDE.md 4.3: "ao trocar de aba") — evita gastar sessão com
   // ninguém olhando.
@@ -267,6 +265,12 @@ export default function PersonDetectionPage() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.ctrlKey || e.altKey || e.metaKey) return; // não atrapalha os atalhos do operador
+      // Shift+S liga/desliga o standby (tecla sem combinação de sistema ou de navegador).
+      if (e.shiftKey && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (!e.repeat) toggleStandby();
+        return;
+      }
       if (standbyRef.current) return; // em standby, só o atalho de acordar vale
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
@@ -285,7 +289,7 @@ export default function PersonDetectionPage() {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [focusIndex, stepFocus, handleSelectProduct, handleRemoveProduct]);
+  }, [focusIndex, stepFocus, handleSelectProduct, handleRemoveProduct, toggleStandby]);
 
   const focusedProduct = PRODUCTS[focusIndex] ?? null;
 

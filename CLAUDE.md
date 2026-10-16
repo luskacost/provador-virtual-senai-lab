@@ -76,7 +76,7 @@ O usuário tem Python intermediário e menos experiência com Next.js/TypeScript
 - Sessão com a Decart **só abre** quando o visitante inicia.
 - Limite por visitante (configurável) com contagem regressiva visível. **Decidido em 07/10/2026 e ajustado em 15/10/2026: 50 s de limite (era 30 s), 15 s de inatividade e 10 s de pausa entre visitantes** (em vez dos 90 s do padrão original) — suficiente para o visitante e economiza créditos da Decart.
 - Encerrar automaticamente por inatividade, ao trocar de aba e ao chegar no limite; voltar para a tela de espera.
-- Atalho de teclado do operador para **encerrar sessão imediatamente** e **resetar** a aplicação. **Acrescentado em 16/10/2026:** `Ctrl+Shift+S` liga/desliga o **standby** (câmera desligada, nada conecta na Decart, tela só com o logo), para o software ficar ligado o dia todo sem gastar créditos nem esquentar a câmera.
+- Atalho de teclado do operador para **encerrar sessão imediatamente** e **resetar** a aplicação. **Acrescentado em 16/10/2026:** `Shift+S` liga/desliga o **standby** (câmera desligada, nada conecta na Decart, tela só com o logo), para o software ficar ligado o dia todo sem gastar créditos nem esquentar a câmera.
 - Usar modo padrão (não usar `speed: "fast"`, que custa o dobro).
 
 ### 4.4 Robustez

@@ -26,9 +26,9 @@
       ver `docs/aprendizados.md`). O estande usa **fundo físico neutro**.
 - [x] Teclado: setas movem o anel branco, Enter veste, Backspace tira a peça, F tira a foto (testado em
       15/10/2026). Deixar um teclado ou controle sem fio ao alcance de quem opera.
-- [ ] Testar o standby ao vivo com a Canon: `Ctrl+Shift+S` apaga a tela (só logo) e desliga a câmera;
+- [ ] Testar o standby ao vivo com a Canon: `Shift+S` apaga a tela (só logo) e desliga a câmera;
       apertar de novo religa a câmera e o quiosque volta. Fechar o dia em standby e abrir de manhã com
-      `Ctrl+Shift+S`.
+      `Shift+S`.
 - [x] Fundo físico neutro do estande montado (liso, sem estampa, sem objetos atrás da pessoa).
 
 ## Na véspera
