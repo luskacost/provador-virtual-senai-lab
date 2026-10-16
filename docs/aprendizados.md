@@ -404,3 +404,9 @@ novo (rosto de modelo inteiro). Estas fotos **não foram testadas antes no Anywe
 
 **Cores quentes:** entraram bomber caramelo, jaqueta chore marrom e blazer príncipe de gales marrom. Ainda
 faltam laranja, vermelho, amarelo e terracota de verdade — a maioria das fotos desse tom foi recusada.
+
+**Atualização 16/10/2026 — rosto cortado das fotos com modelo, a pedido do usuário:** nas 4 fotos com modelo
+do lote acima (jeans quatro bolsos, chore marrom, príncipe de gales, bomber caramelo) e na `camisa-popover-azul-marinho`
+(que mostrava boca e queixo) o topo da imagem foi cortado logo acima do pescoço, sobrando só o look. As fotos
+originais continuam nas imagens da conversa; o git guarda a versão anterior. A popover continua com
+385 px de largura (abaixo do mínimo de 512 do guia, desde que entrou); se der problema ao vivo, ampliar.
