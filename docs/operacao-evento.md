@@ -44,7 +44,7 @@ Durante a sessão, a peça "em foco" tem um anel branco no catálogo.
 
 Com a prévia aberta, as outras teclas ficam travadas, para não mexer na peça que está por trás.
 Tocar/clicar na peça continua funcionando. "Tirar a peça" só esconde a IA na tela; a conexão com a Decart
-continua até o fim da sessão (o limite de 50 s controla o custo).
+continua (e cobra) até a pessoa sair da frente da câmera.
 
 ## Atalhos do operador
 
@@ -67,7 +67,8 @@ operador, não para o visitante).
 | "Não encontramos uma câmera conectada" | Verifique o cabo/driver da câmera; chame o responsável técnico. |
 | Vídeo mostra "Ao vivo" mas a imagem trava | Problema conhecido de rede (ver `docs/aprendizados.md`, "achado técnico" sobre diagnóstico do SDK). Recarregue; se repetir, teste a conexão de internet do local. |
 | Botão "Imprimir" abre o diálogo mas nada sai da impressora | Confira a impressora padrão do Windows e se há papel/tinta. Teste a impressão de outro programa para isolar se o problema é do app ou da impressora. |
-| Quiosque parece "pulando" visitantes | Pode ser o limite de inatividade curto demais para o ritmo do local — ver "Valores da sessão" abaixo. |
+| Sessão não termina quando a pessoa vai embora | Ela termina sozinha uns 3 s depois de a câmera deixar de ver alguém. Se algo na imagem for detectado como pessoa (cartaz, manequim, reflexo), a sessão fica aberta e cobra: tire do quadro, aperte `Ctrl+Shift+E` ou use o standby (`Shift+S`). |
+| Imagem some ou aparece erro no meio de uma sessão longa | Sem limite de tempo, uma queda de conexão pode aparecer durante a sessão. `Ctrl+Shift+E` encerra e `Ctrl+Shift+R` reseta; ver "Valores da sessão" abaixo. |
 
 Em qualquer caso que não resolver na hora: `Ctrl+Shift+R` reseta tudo. Se nem isso resolver, feche o
 terminal (`Ctrl+C`) e repita "Como ligar".
@@ -75,14 +76,18 @@ terminal (`Ctrl+C`) e repita "Como ligar".
 ## Valores da sessão (CLAUDE.md 4.3) — constantes em `web/app/page.tsx`
 
 ```ts
-const SESSION_LIMIT_SECONDS = 50;      // limite total por visitante
-const INACTIVITY_LIMIT_SECONDS = 15;   // sem trocar de peça por esse tempo, encerra
-const COOLDOWN_SECONDS = 10;           // pausa antes de reconectar a mesma pessoa
+const SESSION_LIMIT_SECONDS: number | null = null;     // null = sem limite de tempo
+const INACTIVITY_LIMIT_SECONDS: number | null = null;  // null = não encerra por inatividade
+const COOLDOWN_SECONDS = 5;                            // pausa curta depois de encerrar à força
 ```
 
-**Valores definitivos, decididos em 07/10/2026** (em vez dos 90 s do padrão original): suficientes para o
-visitante experimentar e economizam créditos da Decart. Se no evento o ritmo pedir ajuste, é só mudar as
-constantes acima e refazer o build — mas não é uma pendência.
+**Sem limites, decisão do usuário em 23/10/2026** (antes: 50 s de limite e 15 s de inatividade). Agora a
+sessão **só termina** quando: a pessoa sai da frente da câmera (cerca de 3 s sem ser detectada), o operador
+aperta `Ctrl+Shift+E`, entra em standby (`Shift+S`) ou a aba fica escondida. Não há mais contagem regressiva
+na tela. **Atenção ao custo:** a geração cobra **$0,02 por segundo (2 créditos)** enquanto a sessão estiver
+aberta, ou seja, cerca de **$72 por hora** se alguém ficar parado na frente da câmera. Se o estande ficar
+sem ninguém, use o standby. Para voltar a limitar, troque `null` por segundos em `web/app/page.tsx` e refaça
+o build.
 
 ## Métricas
 

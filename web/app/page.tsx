@@ -12,11 +12,14 @@ import { ProductSidebar } from "@/components/ProductSidebar";
 import { PersonDetectionView } from "@/components/PersonDetectionView";
 import { StandbyScreen } from "@/components/StandbyScreen";
 
-// CLAUDE.md 4.3 - configurável. O padrão do documento é 90s, mas o usuário decidiu em 07/10/2026 manter
-// estes valores de forma permanente (suficiente para o visitante e economiza créditos da Decart).
-const SESSION_LIMIT_SECONDS = 50;
-const INACTIVITY_LIMIT_SECONDS = 15;
-const COOLDOWN_SECONDS = 10;
+// CLAUDE.md 4.3 - configurável. Decisão do usuário em 23/10/2026: SEM limite de tempo e SEM encerramento por
+// inatividade (antes eram 50 s e 15 s). A sessão só termina quando a pessoa sai da frente da câmera, ou pelo
+// operador (Ctrl+Shift+E), standby (Shift+S) ou aba escondida. Para voltar a limitar, troque null por segundos.
+// COOLDOWN_SECONDS é a pausa curta depois de um encerramento forçado, para a pessoa que ainda está na frente
+// não ser reconectada na hora (senão o atalho do operador pareceria não fazer nada).
+const SESSION_LIMIT_SECONDS: number | null = null;
+const INACTIVITY_LIMIT_SECONDS: number | null = null;
+const COOLDOWN_SECONDS = 5;
 
 export default function PersonDetectionPage() {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
@@ -85,7 +88,7 @@ export default function PersonDetectionPage() {
     onForceEnd: handleForceEnd,
   });
 
-  const sessionActive = timer.secondsLeft != null;
+  const sessionActive = timer.active;
   // Em standby a detecção para (vídeo null) e o hook zera "pessoa presente" — assim, ao acordar, não conecta
   // na Decart por causa de uma detecção velha.
   const { personPresent, isReady: detectionReady } = usePersonDetection(
@@ -243,7 +246,7 @@ export default function PersonDetectionPage() {
 
   // "Tirar a peça": some a IA da tela (volta a câmera crua) e libera para escolher outra. A conexão com a
   // Decart segue aberta até o fim da sessão — o SDK não tem uma chamada documentada de "voltar ao original"
-  // e o limite de sessão já controla o custo. Por isso a peça nova só aplica por cima, sem reconectar.
+  // e a geração continua (e cobra) até a pessoa sair. A peça nova só aplica por cima, sem reconectar.
   const handleRemoveProduct = useCallback(() => {
     setActiveProduct(null);
     setShowOriginal(true);
