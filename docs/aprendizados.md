@@ -410,3 +410,11 @@ do lote acima (jeans quatro bolsos, chore marrom, príncipe de gales, bomber car
 (que mostrava boca e queixo) o topo da imagem foi cortado logo acima do pescoço, sobrando só o look. As fotos
 originais continuam nas imagens da conversa; o git guarda a versão anterior. A popover continua com
 385 px de largura (abaixo do mínimo de 512 do guia, desde que entrou); se der problema ao vivo, ampliar.
+
+## Peça nova de 28/10/2026 — `fantasia-arlequim-azul`
+
+Fantasia de arlequim (colete azul com lapelas amarela/rosa, mangas bufantes amarelas listradas, gravata-borboleta
+de bolinhas e calça bufante com losangos), foto de loja em manequim, sem marca d'água/logo, 580×800. Tons quentes
+(amarelo e rosa). Categoria `conjunto`, prompt "Substitute the current outfit". Fora do padrão: foto em **três
+quartos** (manequim de lado) e peça cheia de detalhes — o VTON pode errar o encaixe; testar ao vivo antes de
+mostrar. Entrou depois do congelamento de 24/10 por pedido do usuário (só dado, nenhum código mudou).

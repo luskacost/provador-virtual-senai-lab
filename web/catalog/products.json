@@ -182,5 +182,13 @@
     "imagem": "/catalog/jaqueta-bomber-couro-caramelo.jpg",
     "prompt": "Substitute the current top with a caramel orange leather bomber jacket featuring a ribbed collar and cuffs, a front zipper, two diagonal zip pockets, and contrast topstitching",
     "ativo": true
+  },
+  {
+    "id": "fantasia-arlequim-azul",
+    "nome": "Fantasia Arlequim Azul",
+    "categoria": "conjunto",
+    "imagem": "/catalog/fantasia-arlequim-azul.jpg",
+    "prompt": "Substitute the current outfit with a blue satin harlequin costume consisting of a fitted vest with yellow and pink lapels, yellow striped puffed short sleeves, a black and white polka dot bow tie, and knickers decorated with yellow and pink diamond patches",
+    "ativo": true
   }
 ]
