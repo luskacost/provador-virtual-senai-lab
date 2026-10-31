@@ -418,3 +418,29 @@ de bolinhas e calça bufante com losangos), foto de loja em manequim, sem marca 
 (amarelo e rosa). Categoria `conjunto`, prompt "Substitute the current outfit". Fora do padrão: foto em **três
 quartos** (manequim de lado) e peça cheia de detalhes — o VTON pode errar o encaixe; testar ao vivo antes de
 mostrar. Entrou depois do congelamento de 24/10 por pedido do usuário (só dado, nenhum código mudou).
+
+## Métricas reais do evento (27 a 29/10/2026) — lidas de `web/data/metricas.json` em 31/10
+
+Fonte: as métricas locais do quiosque (seção 4.5). Das 152 sessões registradas desde o início do projeto, **99
+são do evento** (27/10: 48, 28/10: 40, 29/10: 11) e 53 são de testes e montagem (a de 26/10 tem 9). Os números
+abaixo são só do evento.
+
+- **Uso:** 99 sessões, 12.610 s de vídeo gerado (3,5 h). Duração média 127 s, mediana 101 s, maior 373 s
+  (sem limite de sessão desde 23/10; 11 sessões passaram de 5 min).
+- **Engajamento:** 87% das sessões (86 de 99) experimentaram pelo menos uma peça; 641 trocas de peça no total,
+  média de 7,5 por sessão com peça. As 13 sem peça foram quase todas muito curtas (9 duraram menos de 10 s).
+- **Como terminaram:** 75 pelo operador (`Ctrl+Shift+E`), 22 pela pessoa sair, 2 por aba escondida. Como o
+  operador encerrou a maioria para apresentar a outra pessoa, a duração média reflete o ritmo do operador,
+  **não** o interesse do visitante.
+- **Horário:** 13h a 19h, pico às 14h (22 sessões), 18h teve 18.
+- **Ranking de peças (vezes aplicada):** 1) Jaqueta de Combate a Incêndio Vermelha (83), 2) Vestido Mini
+  Babados Off-White (64), 3) Macacão Pied-de-Poule Marrom (57), 4) Jaqueta de Combate a Incêndio (52), 5)
+  Macacão Alfaiataria Verde Militar (43). **Menos usadas:** Camiseta Esportiva SESI (3), Camiseta Básica Areia
+  (6), Fantasia Arlequim Azul (6, entrou no catálogo só em 28/10), Camisetas Básicas Verde Sálvia e Oversized
+  Preta (9 cada). Nenhuma peça ficou sem uso.
+- **Padrão para a Etapa 2:** o público escolheu peças marcantes (EPI de bombeiro, vestido, macacão) e quase
+  ignorou as camisetas lisas, inclusive a do próprio SENAI. Catálogo futuro: menos básicos, mais peças
+  com personalidade.
+- **O que o software NÃO mede:** quantas fotos foram tiradas/impressas, quantas pessoas diferentes (uma pessoa
+  pode ter várias sessões), erros de conexão, nem o gasto real. Para a Etapa 2, registrar foto/impressão e
+  erros, e separar métricas de teste das de evento (hoje ficam no mesmo arquivo).
