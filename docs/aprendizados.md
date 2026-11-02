@@ -444,3 +444,17 @@ abaixo são só do evento.
 - **O que o software NÃO mede:** quantas fotos foram tiradas/impressas, quantas pessoas diferentes (uma pessoa
   pode ter várias sessões), erros de conexão, nem o gasto real. Para a Etapa 2, registrar foto/impressão e
   erros, e separar métricas de teste das de evento (hoje ficam no mesmo arquivo).
+
+## Estudo da próxima etapa (02/11/2026): ID da peça e nichos
+
+Relatório completo em `docs/etapa2/relatorio-estudo.md` (proposta do ID em `docs/etapa2/ideia-id-da-peca.md`).
+- **ID da peça:** viável com a Decart de hoje. O token aceita prazo, modelos, origens e
+  `constraints.realtime.maxSessionDuration` (conferido no SDK 0.2.5); não há token de uso único nem teto de
+  gasto, então cota e orçamento ficam do nosso lado. O risco é econômico: a 127 s por sessão (média do evento) a
+  venda custa US$ 10–51; só fecha com até 20–30 s e conversão ≥ 10%. O teto de duração pesa mais que o ID.
+- **Nichos:** EPI/uniformes (B2B) e festa/aluguel primeiro; acessórios grandes e calçados depois de testar
+  enquadramento; lingerie/praia e infantil só com parecer jurídico (a política de uso da Decart proíbe imagem
+  íntima não consentida e conteúdo sugestivo com menores). Plus size é teste de viés em todos os nichos.
+- **Prompts:** o guia oficial usa "Substitute the upper body garment…" e "Add … to the outfit"; o catálogo atual
+  usa "current top" e "to the hands/head/face". Testar o padrão oficial nas peças de mão, cabeça e rosto.
+- **Próximo passo sugerido:** piloto B2B de EPI em quiosque, peça aberta pelo EAN/QR, teto de 30 s.
