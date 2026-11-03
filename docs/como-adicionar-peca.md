@@ -27,7 +27,7 @@ web/public/catalog/<slug-da-peca>.jpg
 ```
 
 Use um nome em kebab-case (letras minúsculas, hífens), sem espaços ou acentos — vai virar parte da URL.
-Exemplos já no catálogo: `sesi-camiseta-branca.jpg`, `colete-alta-visibilidade.jpg`.
+Exemplo já no catálogo: `colete-alta-visibilidade.jpg`.
 
 ## 3. Adicione a entrada em `web/catalog/products.json`
 
