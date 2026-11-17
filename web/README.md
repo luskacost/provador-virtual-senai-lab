@@ -28,8 +28,8 @@ Página carrega → câmera inicia (getUserMedia)
   → MediaPipe PoseLandmarker (auto-hospedado, scripts/setup-mediapipe.mjs) detecta presença no navegador
     → pessoa detectada → token em /api/tokens → conecta à Decart (WebRTC)
       → visitante escolhe uma peça → garmentBlob + prompt → setImage()
-      → "Tirar foto" / "Gravar vídeo" → captura efêmera, QR code para o celular (lib/capture-store.ts)
-    → limite de tempo, inatividade, aba escondida ou atalho do operador → desconecta (hooks/useSessionTimer.ts)
+      → "Tirar foto" → imagem montada no navegador e impressa direto (lib/print-image.ts)
+    → aba escondida ou atalho do operador (limite de tempo e inatividade opcionais, hoje desligados) → desconecta (hooks/useSessionTimer.ts)
       → registra a sessão em data/metricas.json (lib/metrics.ts) — nunca vídeo/imagem
     → pessoa sai → desconecta (para de cobrar) → volta a escanear
 ```
@@ -44,7 +44,7 @@ Página carrega → câmera inicia (getUserMedia)
 | `hooks/usePersonDetection.ts` | MediaPipe Pose no navegador; vira `personPresent`. |
 | `hooks/useDecartRealtime.ts` | Conecta/desconecta da Decart; loga `diagnostic`/`stats` do SDK no console (achado útil se o vídeo travar — ver `docs/aprendizados.md`). |
 | `hooks/useSessionTimer.ts` | Limite de sessão, inatividade, cooldown (CLAUDE.md 4.3). |
-| `hooks/useCapture.ts` + `components/CaptureControls.tsx` | Foto/vídeo efêmero por QR code (CLAUDE.md 4.5b). |
+| `hooks/useCapture.ts` + `components/CaptureControls.tsx` + `lib/print-image.ts` | Foto do resultado impressa direto pela impressora do quiosque (CLAUDE.md 4.5b). |
 | `lib/metrics.ts` + `app/api/metrics/` + `app/metricas/` | Métricas locais e a página de resumo para os coordenadores. |
 | `lib/errors.ts` | Traduz erros técnicos para mensagens amigáveis (CLAUDE.md 4.4). |
 | `components/IdleScreen.tsx` | Tela de espera + aviso de LGPD. |

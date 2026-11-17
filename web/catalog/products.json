@@ -56,46 +56,6 @@
     "ativo": true
   },
   {
-    "id": "conjunto-listrado-preto-branco",
-    "nome": "Conjunto Camisa e Mini Listrado",
-    "categoria": "conjunto",
-    "imagem": "/catalog/conjunto-listrado-preto-branco.jpg",
-    "prompt": "Substitute the current outfit with a black and white pinstripe long-sleeve shirt with chest flap pockets tucked into a black A-line mini skirt",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-epi-azul-marinho",
-    "nome": "Jaqueta Multibolso Azul-Marinho",
-    "categoria": "epi-corpo",
-    "imagem": "/catalog/jaqueta-epi-azul-marinho.jpg",
-    "prompt": "Substitute the current top with a navy blue flame-resistant work jacket featuring a stand collar, two chest flap pockets, and grey reflective stripes across the chest and sleeves",
-    "ativo": true
-  },
-  {
-    "id": "camisa-popover-azul-marinho",
-    "nome": "Camisa Popover Manga Curta Azul-Marinho",
-    "categoria": "top",
-    "imagem": "/catalog/camisa-popover-azul-marinho.jpg",
-    "prompt": "Substitute the current top with a navy blue short-sleeve popover shirt featuring a collared placket with buttons, cuffed cap sleeves, and a curved hem with front slit pockets",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-bombeiro-turnout",
-    "nome": "Jaqueta de Combate a Incêndio",
-    "categoria": "epi-corpo",
-    "imagem": "/catalog/jaqueta-bombeiro-turnout.jpg",
-    "prompt": "Substitute the current top with a tan flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, arms, and hem, and bellows pockets with reflective flaps",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-bombeiro-vermelha",
-    "nome": "Jaqueta de Combate a Incêndio Vermelha",
-    "categoria": "epi-corpo",
-    "imagem": "/catalog/jaqueta-bombeiro-vermelha.png",
-    "prompt": "Substitute the current top with a red flame-resistant firefighter turnout jacket featuring a tall stand collar, double yellow-and-silver reflective trim bands across the chest, shoulders, and sleeves, and multiple bellows pockets with D-ring clips",
-    "ativo": true
-  },
-  {
     "id": "luvas-protecao-azul",
     "nome": "Luvas de Solda Reforçadas",
     "categoria": "epi-maos",
@@ -117,70 +77,6 @@
     "categoria": "acessorio",
     "imagem": "/catalog/oculos-esportivo-preto.jpg",
     "prompt": "Add black sport wraparound sunglasses with a single dark shield lens to the face",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-workwear-verde",
-    "nome": "Jaqueta Workwear Verde",
-    "categoria": "top",
-    "imagem": "/catalog/jaqueta-workwear-verde.jpg",
-    "prompt": "Substitute the current top with a forest green cotton workwear zip-up jacket featuring a spread collar, a chest patch pocket, two large front patch pockets, and contrast cream topstitching",
-    "ativo": true
-  },
-  {
-    "id": "blazer-acinturado-roxo",
-    "nome": "Blazer Acinturado Roxo",
-    "categoria": "top",
-    "imagem": "/catalog/blazer-acinturado-roxo.jpg",
-    "prompt": "Substitute the current top with a deep purple tailored blazer featuring notch lapels, covered buttons, a self-fabric tie belt at the waist, and a flared hem",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-couro-envelhecido-azul",
-    "nome": "Jaqueta de Couro Envelhecido Azul",
-    "categoria": "top",
-    "imagem": "/catalog/jaqueta-couro-envelhecido-azul.jpg",
-    "prompt": "Substitute the current top with a washed light blue distressed leather zip-up jacket featuring a classic collar, slanted zip pockets, and buttoned cuffs",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-jeans-quatro-bolsos-azul-marinho",
-    "nome": "Jaqueta Jeans Quatro Bolsos Azul-Marinho",
-    "categoria": "top",
-    "imagem": "/catalog/jaqueta-jeans-quatro-bolsos-azul-marinho.jpg",
-    "prompt": "Substitute the current top with a dark indigo denim zip-up jacket featuring a pointed collar, four large patch pockets, and white contrast topstitching",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-chore-marrom",
-    "nome": "Jaqueta Chore Marrom",
-    "categoria": "top",
-    "imagem": "/catalog/jaqueta-chore-marrom.jpg",
-    "prompt": "Substitute the current top with a dark brown cotton chore jacket with a spread collar, a button front, and large patch pockets",
-    "ativo": true
-  },
-  {
-    "id": "blazer-principe-de-gales-marrom",
-    "nome": "Blazer Príncipe de Gales Marrom",
-    "categoria": "top",
-    "imagem": "/catalog/blazer-principe-de-gales-marrom.jpg",
-    "prompt": "Substitute the current top with a brown glen plaid wool blazer with notch lapels, two front buttons, and buttoned cuffs",
-    "ativo": true
-  },
-  {
-    "id": "jaqueta-bomber-couro-caramelo",
-    "nome": "Jaqueta Bomber de Couro Caramelo",
-    "categoria": "top",
-    "imagem": "/catalog/jaqueta-bomber-couro-caramelo.jpg",
-    "prompt": "Substitute the current top with a caramel orange leather bomber jacket featuring a ribbed collar and cuffs, a front zipper, two diagonal zip pockets, and contrast topstitching",
-    "ativo": true
-  },
-  {
-    "id": "fantasia-arlequim-azul",
-    "nome": "Fantasia Arlequim Azul",
-    "categoria": "conjunto",
-    "imagem": "/catalog/fantasia-arlequim-azul.jpg",
-    "prompt": "Substitute the current outfit with a blue satin harlequin costume consisting of a fitted vest with yellow and pink lapels, yellow striped puffed short sleeves, a black and white polka dot bow tie, and knickers decorated with yellow and pink diamond patches",
     "ativo": true
   }
 ]

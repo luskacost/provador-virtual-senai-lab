@@ -24,7 +24,8 @@
       (Copiar 1)"**, que é o padrão. Teste pelo app (F → Enter) feito em 15/10/2026.
 - [x] "Permitir que o Windows gerencie minha impressora padrão" desativado em 15/10/2026 (valor
       `LegacyDefaultPrinterMode=1` em HKCU); a padrão continua a "FUJIFILM ASK-300 (Copiar 1)".
-- [x] Saldo da chave carregado em 15/10/2026. Conferir o saldo no painel da Decart nocomeço de cada dia do evento.
+- [x] Saldo da chave carregado em 15/10/2026. Conferir o saldo no painel da Decart no começo de cada dia
+      do evento.
 - [x] Decidir a resposta para a seção 4.7 (cenário de fundo): **decidido em 07/10/2026 — troca de fundo
       por IA fica FORA do evento** (testada e reprovada: fundo que não aparece, peça duplicada, custo alto;
       ver `docs/aprendizados.md`). O estande usa **fundo físico neutro**.
